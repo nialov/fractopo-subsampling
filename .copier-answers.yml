@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier
+_commit: 943d174
+_src_path: https://github.com/nialov/nialov-py-template.git
+broad_topic: Data Analysis
+description: Scripts for fractopo.
+email: nikolasovaskainen@gmail.com
+full_name: Nikolas Ovaskainen
+github_account: nialov
+keywords: data analysis spatial geology brittle simulation sampling
+narrow_topic: Spatial Analysis
+package: fractopo_scripts
+year: 2021
