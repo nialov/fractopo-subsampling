@@ -13,6 +13,10 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 
 [packages]
+fractopo = {git = "https://github.com/nialov/fractopo.git"}
+click = "*"
+jupyterlab = "*"
+pandera = "*"
 
 [requires]
 python_version = "3.8"
