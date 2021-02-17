@@ -1,12 +1,7 @@
 """
 pandera schema(s) for DataFrame results.
 """
-from pandera import (
-    DataFrameSchema,
-    Column,
-    Check,
-    PandasDtype,
-)
+from pandera import Check, Column, DataFrameSchema, PandasDtype
 
 describe_df_schema = DataFrameSchema(
     columns={

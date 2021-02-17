@@ -1,18 +1,19 @@
 """
 Fractopo Network sampling scripts.
 """
-from fractopo.analysis.network import Network
-from shapely.geometry import Point
 from pathlib import Path
+from shutil import move
+from typing import Optional, Tuple
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from typing import Tuple, Optional
-from shutil import move
-from shapely.wkt import loads
-from matplotlib.projections.polar import PolarAxes
+from fractopo.analysis.network import Network
+from fractopo.general import pygeos_spatial_index, safe_buffer
 from matplotlib.figure import Figure
-from fractopo.general import safe_buffer, pygeos_spatial_index
+from matplotlib.projections.polar import PolarAxes
+from shapely.geometry import Point
+from shapely.wkt import loads
 
 from fractopo_scripts.simulation.schema import describe_df_schema
 

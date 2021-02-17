@@ -1,4 +1,8 @@
-from functools import lru_cache
+"""
+Tests for fractopo_scripts.
+
+Contains most test parameters.
+"""
 import tempfile
 
 

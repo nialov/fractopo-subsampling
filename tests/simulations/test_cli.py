@@ -1,10 +1,11 @@
 """
 Tests for simulation.cli.py.
 """
+import pytest
 from click.testing import CliRunner
+
 import fractopo_scripts.simulation.cli as cli
 import tests
-import pytest
 
 
 @pytest.mark.parametrize("params", tests.test_main_params())
