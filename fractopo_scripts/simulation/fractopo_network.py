@@ -266,6 +266,7 @@ def describe_random_network(
     )
     if not point_as_geom:
         describe_df = describe_df_schema.validate(describe_df)
+    assert not describe_df.empty
     return describe_df
 
 
@@ -369,6 +370,7 @@ def save_describe_df(describe_df: pd.DataFrame, results_path: Path):
         concatted = pd.concat([df, describe_df])
     else:
         concatted = describe_df
+    assert not concatted.empty
 
     save_csv(concatted, results_path)
     concatted.to_pickle(results_path.with_suffix(".pickle"))

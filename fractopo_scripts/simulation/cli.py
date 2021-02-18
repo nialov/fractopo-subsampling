@@ -85,6 +85,7 @@ def baseanalyze(
 @click.argument("other_results_path_str", type=click.Path(exists=True, dir_okay=True))
 @click.argument("coverage_path_str", type=click.Path(exists=True, dir_okay=False))
 @click.option("how_many", "--how-many", type=click.IntRange(1, 100), default=1)
+@click.option("hashname", "--hashname", is_flag=True, default=False)
 def sim(
     traces_path_str: str,
     area_path_str: str,
@@ -92,6 +93,7 @@ def sim(
     other_results_path_str: str,
     coverage_path_str: str,
     how_many: int,
+    hashname: bool,
 ):
     """
     Simulate single network sampling within the given sample area.
@@ -112,6 +114,20 @@ def sim(
 
         network, target_centroid, radius = sampler.random_network_sample()
         amount_of_coverage = assess_coverage(target_centroid, radius, coverage_gdf)
+        if hashname:
+            name_hash = abs(hash(target_centroid.wkt))
+            results_path = (
+                results_path.parent / f"{results_path.stem}_{name_hash}"
+                f"{results_path.suffix}"
+            )
+            if results_path.exists():
+                more_complex_hash = abs(hash(target_centroid.wkt) + hash(radius))
+                results_path = (
+                    results_path.parent / f"{results_path.stem}_{more_complex_hash}"
+                    f"{results_path.suffix}"
+                )
+                assert not results_path.exists()
+
         describe_df = describe_random_network(
             network=network,
             target_centroid=target_centroid,
