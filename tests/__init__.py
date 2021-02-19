@@ -31,6 +31,8 @@ def test_baseanalyze_params():
                 flato_area_path_str,
                 f"{tempfile.mkdtemp()}",
                 f"{tempfile.mkdtemp()}",
+                flato_area_path_str,
+                "25.0",
             ]
         ),
     ]
@@ -86,6 +88,7 @@ def test_baseanalyze_with_gather_params():
         other_results_path_str,
         overwrite,
         save_path_str,
+        circle_radius,
     ) in zip(
         [flato_traces_path_str],
         [flato_area_path_str],
@@ -93,15 +96,18 @@ def test_baseanalyze_with_gather_params():
         [tempfile.mkdtemp()],
         [""],
         [f"{tempfile.mktemp(suffix='.csv')}"],
+        ["25.0"],
     ):
         param = (
             traces_path_str,
             area_path_str,
             results_path_str,
             other_results_path_str,
+            area_path_str,
+            circle_radius,
             overwrite,
             save_path_str,
         )
-        assert len(param) == 6
+        assert len(param) == 8
         params.append(param)
     return params

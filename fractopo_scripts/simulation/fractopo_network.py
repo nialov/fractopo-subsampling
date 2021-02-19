@@ -1,6 +1,7 @@
 """
 Fractopo Network sampling scripts.
 """
+import logging
 from pathlib import Path
 from shutil import move
 from typing import Optional, Tuple
@@ -41,6 +42,7 @@ def save_results(gdf: gpd.GeoDataFrame, save_path: Path):
     Save GeoDataFrame results but keep backup if file at path exists.
     """
     if save_path.exists():
+        logging.debug("Found existing. Creating backup.")
         move(save_path, save_path.parent / f"{save_path.name}.backup")
     gdf.to_file(save_path, driver="GPKG")
 
@@ -160,6 +162,8 @@ def analyze(
     area: gpd.GeoDataFrame,
     name: str,
     other_results_path: Path,
+    coverage_gdf: gpd.GeoDataFrame,
+    circle_radius: float,
 ):
     """
     Analyze traces and area for wanted results.
@@ -170,9 +174,12 @@ def analyze(
     -  All points in single layer
     """
     # Analyze
-    network, description_srs = network_analyze(traces, area, name=name)
+    network, description_srs = network_analyze(
+        traces, area, name=name, coverage_gdf=coverage_gdf, circle_radius=circle_radius
+    )
     plot_and_save_azimuths(network, other_results_path, name)
 
+    assert isinstance(description_srs, pd.Series)
     return description_srs
 
 
@@ -209,7 +216,11 @@ def plot_and_save_azimuths(network: Network, other_results_path: Path, name: str
 
 
 def network_analyze(
-    traces: gpd.GeoDataFrame, area: gpd.GeoDataFrame, name: str
+    traces: gpd.GeoDataFrame,
+    area: gpd.GeoDataFrame,
+    name: str,
+    coverage_gdf: gpd.GeoDataFrame,
+    circle_radius: float,
 ) -> Tuple[Network, pd.Series]:
     """
     Analyze traces and area for results.
@@ -221,14 +232,23 @@ def network_analyze(
         determine_branches_nodes=True,
         snap_threshold=0.001,
     )
-
-    description = network.numerical_network_description()
     points = network.representative_points()
     if not len(points) == 1:
         raise ValueError("Expected one target area representative point.")
     point = points[0]
+    amount_of_coverage = assess_coverage(
+        target_centroid=point, coverage_gdf=coverage_gdf, radius=circle_radius
+    )
+    describe_df = describe_random_network(
+        network=network,
+        target_centroid=point,
+        name=name,
+        point_as_geom=False,
+        amount_of_coverage=amount_of_coverage,
+        radius=circle_radius,
+    )
 
-    return network, pd.Series({GEOM_COL: point.wkt, **description, "name": name})
+    return network, describe_df.iloc[0]
 
 
 def describe_random_network(

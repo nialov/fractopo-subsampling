@@ -41,7 +41,8 @@ def test_baseanalyze(params: list):
 
 @pytest.mark.parametrize(
     "traces_path_str,area_path_str,results_path_str,"
-    "other_results_path_str,overwrite,save_path_str",
+    "other_results_path_str,coverage_path_str,"
+    "circle_radius,overwrite,save_path_str",
     tests.test_baseanalyze_with_gather_params(),
 )
 def test_baseanalyze_with_gather(
@@ -49,6 +50,8 @@ def test_baseanalyze_with_gather(
     area_path_str,
     results_path_str,
     other_results_path_str,
+    coverage_path_str,
+    circle_radius,
     overwrite,
     save_path_str,
 ):
@@ -62,6 +65,8 @@ def test_baseanalyze_with_gather(
             area_path_str,
             results_path_str,
             other_results_path_str,
+            coverage_path_str,
+            circle_radius,
             overwrite,
         ]
         if len(arg) > 0

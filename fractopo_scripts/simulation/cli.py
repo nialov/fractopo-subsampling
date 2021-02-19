@@ -1,6 +1,7 @@
 """
 Command line interface of simulation scripts.
 """
+import logging
 from pathlib import Path
 
 import click
@@ -35,9 +36,11 @@ def gatherbase(results_path_str: str, save_path_str: str):
     """
     Gather run results to GeoPackage.
     """
+    logging.debug(f"Gathering from {results_path_str} into {save_path_str}.")
     results_path = Path(results_path_str)
     save_path = Path(save_path_str)
     gdf = gather_results(results_path)
+    logging.debug("GeoDataFrame made. Saving.")
     save_results(gdf, save_path=save_path)
 
 
@@ -46,12 +49,16 @@ def gatherbase(results_path_str: str, save_path_str: str):
 @click.argument("area_path_str", type=click.Path(exists=True, dir_okay=False))
 @click.argument("results_path_str", type=click.Path(exists=True, dir_okay=True))
 @click.argument("other_results_path_str", type=click.Path(exists=True, dir_okay=True))
+@click.argument("coverage_path_str", type=click.Path(exists=True, dir_okay=False))
+@click.argument("circle_radius", type=click.FloatRange(min=0.001))
 @click.option("overwrite", "--overwrite", is_flag=True, default=False)
 def baseanalyze(
     traces_path_str: str,
     area_path_str: str,
     results_path_str: str,
     other_results_path_str: str,
+    coverage_path_str: str,
+    circle_radius: float,
     overwrite: bool,
 ) -> bool:
     """
@@ -61,16 +68,25 @@ def baseanalyze(
     area_path = Path(area_path_str)
     results_path = Path(results_path_str)
     other_results_path = Path(other_results_path_str)
+    coverage_path = Path(coverage_path_str)
 
     if not (results_path.exists() and results_path.is_dir()):
         raise NotADirectoryError(f"Expected {results_path} dir to exist.")
 
     traces, area = read_geofile(traces_path), read_geofile(area_path)
+    coverage_gdf = read_geofile(coverage_path)
     name = area_path.stem
     result_path = results_path / f"{name}.pickle"
     if result_path.exists() and not overwrite:
         return False
-    description_srs = analyze(traces, area, name, other_results_path)
+    description_srs = analyze(
+        traces,
+        area,
+        name,
+        other_results_path,
+        coverage_gdf=coverage_gdf,
+        circle_radius=circle_radius,
+    )
     if result_path.exists():
         result_path.unlink()
     description_srs.to_pickle(results_path / f"{name}.pickle")
