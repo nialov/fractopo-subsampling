@@ -40,6 +40,47 @@ def test_baseanalyze(params: list):
 
 
 @pytest.mark.parametrize(
+    "traces_path_str,area_path_str,results_path_str,"
+    "other_results_path_str,overwrite,save_path_str",
+    tests.test_baseanalyze_with_gather_params(),
+)
+def test_baseanalyze_with_gather(
+    traces_path_str,
+    area_path_str,
+    results_path_str,
+    other_results_path_str,
+    overwrite,
+    save_path_str,
+):
+    """
+    Test baseanalyze and gatherbase entrypoints.
+    """
+    args = [
+        arg
+        for arg in [
+            traces_path_str,
+            area_path_str,
+            results_path_str,
+            other_results_path_str,
+            overwrite,
+        ]
+        if len(arg) > 0
+    ]
+    runner = CliRunner()
+    result = runner.invoke(cli.baseanalyze, args=args)
+    if not result.exit_code == 0:
+        print(result.stdout)
+        assert False
+
+    args = [results_path_str, save_path_str]
+    runner = CliRunner()
+    result = runner.invoke(cli.gatherbase, args=args)
+    if not result.exit_code == 0:
+        print(result.stdout)
+        assert False
+
+
+@pytest.mark.parametrize(
     ",".join(
         [
             "traces_path_str",
@@ -100,7 +141,7 @@ def test_sim(
         if not len(globbed) == 1:
             for path in globbed:
                 path.unlink()
-            raise Exception("Found old temp csvtest files. Deleted. Rerun test.")
+            assert False
         df = fn.read_csv(globbed[0])
         globbed[0].unlink()
         assert isinstance(df, pd.DataFrame)
