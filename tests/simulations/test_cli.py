@@ -1,6 +1,7 @@
 """
 Tests for simulation.cli.py.
 """
+import traceback
 from pathlib import Path
 
 import pandas as pd
@@ -22,7 +23,10 @@ def test_main(params: list):
     runner = CliRunner()
     result = runner.invoke(cli.main, args=params)
     if not result.exit_code == 0:
-        print(result.stdout)
+        assert result.exc_info is not None
+        err_type, val, tb = result.exc_info
+        print(err_type, val)
+        traceback.print_tb(tb)
         assert False
 
 
@@ -35,7 +39,10 @@ def test_baseanalyze(params: list):
     runner = CliRunner()
     result = runner.invoke(cli.baseanalyze, args=params)
     if not result.exit_code == 0:
-        print(result.stdout)
+        assert result.exc_info is not None
+        err_type, val, tb = result.exc_info
+        print(err_type, val)
+        traceback.print_tb(tb)
         assert False
 
 
@@ -74,14 +81,20 @@ def test_baseanalyze_with_gather(
     runner = CliRunner()
     result = runner.invoke(cli.baseanalyze, args=args)
     if not result.exit_code == 0:
-        print(result.stdout)
+        assert result.exc_info is not None
+        err_type, val, tb = result.exc_info
+        print(err_type, val)
+        traceback.print_tb(tb)
         assert False
 
     args = [results_path_str, save_path_str]
     runner = CliRunner()
     result = runner.invoke(cli.gatherbase, args=args)
     if not result.exit_code == 0:
-        print(result.stdout)
+        assert result.exc_info is not None
+        err_type, val, tb = result.exc_info
+        print(err_type, val)
+        traceback.print_tb(tb)
         assert False
 
 
@@ -133,7 +146,10 @@ def test_sim(
         args=args,
     )
     if not result.exit_code == 0:
-        print(result.stdout)
+        assert result.exc_info is not None
+        err_type, val, tb = result.exc_info
+        print(err_type, val)
+        traceback.print_tb(tb)
         assert False
 
     if len(hashname) == 0:

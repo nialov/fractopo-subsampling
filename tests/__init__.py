@@ -4,9 +4,34 @@ Tests for fractopo_scripts.
 Contains most test parameters.
 """
 import tempfile
+from functools import lru_cache
+from pathlib import Path
+
+import geopandas as gpd
+from fractopo.general import read_geofile
 
 flato_traces_path_str = "tests/sample_data/Flato_20m_1_traces.gpkg"
 flato_area_path_str = "tests/sample_data/Flato_20m_1_area.gpkg"
+flato_traces_path = Path(flato_traces_path_str)
+flato_area_path = Path(flato_area_path_str)
+
+
+@lru_cache(maxsize=None)
+def flato_traces_gdf(flato_traces_path: Path = flato_traces_path) -> gpd.GeoDataFrame:
+    """
+    Get flato traces GeoDataFrame.
+    """
+    traces = read_geofile(flato_traces_path)
+    return traces
+
+
+@lru_cache(maxsize=None)
+def flato_area_gdf(flato_area_path: Path = flato_area_path) -> gpd.GeoDataFrame:
+    """
+    Get flato area GeoDataFrame.
+    """
+    area = read_geofile(flato_area_path)
+    return area
 
 
 def test_main_params():

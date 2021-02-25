@@ -178,9 +178,25 @@ def analyze(
         traces, area, name=name, coverage_gdf=coverage_gdf, circle_radius=circle_radius
     )
     plot_and_save_azimuths(network, other_results_path, name)
+    save_branches_and_nodes(network, other_results_path)
 
     assert isinstance(description_srs, pd.Series)
     return description_srs
+
+
+def save_branches_and_nodes(network: Network, other_results_path: Path):
+    """
+    Save branches and nodes from Network to other_results_path.
+    """
+    try:
+        network.branch_gdf.to_file(
+            other_results_path / f"{network.name}_branches.gpkg", driver="GPKG"
+        )
+        network.node_gdf.to_file(
+            other_results_path / f"{network.name}_nodes.gpkg", driver="GPKG"
+        )
+    except:
+        logging.error(f"Failed to save branches and nodes to {other_results_path}.")
 
 
 def plainify_rose_plot(fig: Figure, ax: PolarAxes):
@@ -243,7 +259,6 @@ def network_analyze(
         network=network,
         target_centroid=point,
         name=name,
-        point_as_geom=False,
         amount_of_coverage=amount_of_coverage,
         radius=circle_radius,
     )
@@ -257,7 +272,6 @@ def describe_random_network(
     radius: float,
     name: str,
     amount_of_coverage: float,
-    point_as_geom: bool = False,
 ) -> pd.DataFrame:
     """
     Describe a Network.
@@ -267,14 +281,24 @@ def describe_random_network(
 
     TODO: Zero to np.nan?
     """
-    if network is None:
-        numerical_network_description = empty_numerical_desc()
-    else:
+    empty_numerical_network_description = empty_numerical_desc()
+    if network is not None:
         numerical_network_description = network.numerical_network_description()
+        # Validate empty_numerical_network_description assuming that atleast
+        # some non-empty data is passed here
+        # (hacky)
+        assert all(
+            [
+                key in empty_numerical_network_description
+                for key in numerical_network_description
+            ]
+        )
+    else:
+        numerical_network_description = empty_numerical_network_description
     describe_df = pd.DataFrame(
         [
             {
-                GEOM_COL: target_centroid if point_as_geom else target_centroid.wkt,
+                GEOM_COL: target_centroid.wkt,
                 **numerical_network_description,
                 "name": name,
                 "radius": radius,
@@ -284,8 +308,7 @@ def describe_random_network(
             }
         ]
     )
-    if not point_as_geom:
-        describe_df = describe_df_schema.validate(describe_df)
+    describe_df = describe_df_schema.validate(describe_df)
     assert not describe_df.empty
     return describe_df
 

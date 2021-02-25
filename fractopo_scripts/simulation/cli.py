@@ -150,7 +150,6 @@ def sim(
             radius=radius,
             name=area_path.stem,
             amount_of_coverage=amount_of_coverage,
-            point_as_geom=False,
         )
 
         save_describe_df(describe_df, results_path=results_path)
