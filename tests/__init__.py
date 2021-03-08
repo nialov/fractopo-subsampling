@@ -4,6 +4,7 @@ Tests for fractopo_scripts.
 Contains most test parameters.
 """
 import tempfile
+import pandas as pd
 from functools import lru_cache
 from pathlib import Path
 
@@ -136,3 +137,40 @@ def test_baseanalyze_with_gather_params():
         assert len(param) == 8
         params.append(param)
     return params
+
+
+@lru_cache(maxsize=None)
+def test_aggregate_chosen_params():
+    """
+    Params for test_aggregate_chosen_manual.
+    """
+
+    def make_param(chosen_dicts: list, params_with_func: dict, assume_result: dict):
+        return ([pd.Series(cd) for cd in chosen_dicts], params_with_func, assume_result)
+
+    return [
+        make_param(
+            [
+                {"area": 1, "intensity": 5},
+                {"area": 10, "intensity": 5},
+            ],
+            {"intensity": "mean"},
+            assume_result={"intensity": 5},
+        ),
+        make_param(
+            [
+                {"area": 1, "intensity": 5, "hello": 1},
+                {"area": 10, "intensity": 5, "hello": 10},
+            ],
+            {"intensity": "mean", "hello": "sum"},
+            assume_result={"intensity": 5, "hello": 11},
+        ),
+        make_param(
+            [
+                {"area": 1, "intensity": 0, "hello": 1},
+                {"area": 2, "intensity": 1, "hello": 10},
+            ],
+            {"intensity": "mean", "hello": "sum"},
+            assume_result={"intensity": 0.66666666, "hello": 11},
+        ),
+    ]
