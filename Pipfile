@@ -11,6 +11,7 @@ invoke = "*"
 nbsphinx = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
+ipython = "*"
 
 [packages]
 fractopo = {git = "https://github.com/nialov/fractopo.git"}
