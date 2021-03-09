@@ -31,7 +31,6 @@ class Utils:
         "Getaberget_20m_1_3_area": 10,  # 10 m
         "Getaberget_20m_1_4_area": 50,
         "Havsvidden_20m_1_area": 50,
-        "Segelskar_20m_1_1_area": 40,  # 40 m
     }
 
     radius = "radius"
@@ -41,7 +40,7 @@ class Utils:
     trace_power_law_vs_lognormal_p = "trace power_law vs. lognormal p"
 
     params_with_func = {
-        "Fracture Intensity (Mauldon)": "mean",
+        # "Fracture Intensity (Mauldon)": "mean",
         "Connections per Branch": "mean",
         "trace power_law exponent": "mean",
         "branch power_law exponent": "mean",
@@ -53,6 +52,30 @@ class Utils:
 
     base_circle_ids_csv_path = Path("../results/base_circle_ids.csv")
     base_circle_reference_value_csv_path = Path("../results/base_reference_values.csv")
+
+    renamed_params = {
+        "trace power_law exponent": "Trace Powerlaw Exponent",
+        "branch power_law exponent": "Branch Powerlaw Exponent",
+    }
+
+    selected_params = {
+        "Connections per Branch",
+        "trace power_law exponent",
+        "branch power_law exponent",
+        "Fracture Intensity P21",
+    }
+
+
+def param_renamer(param: str):
+    """
+    Rename param for nicer plotting name.
+
+    If no rename in renamed_params is defined no renaming is done.
+    """
+    try:
+        return Utils.renamed_params[param]
+    except KeyError:
+        return param
 
 
 def random_sample_of_circles(
@@ -183,11 +206,11 @@ def paper_figsize(
     multiplier: float,
     paper_height=11.7,
     paper_width=8.27,
-):
+) -> Tuple[float, float]:
     """
     Get figsize for A4.
     """
-    return (paper_height, min([paper_width, paper_width * multiplier]))
+    return (paper_width, min([paper_height, paper_height * multiplier]))
 
 
 def label_point(
