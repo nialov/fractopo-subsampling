@@ -17,6 +17,7 @@ from shapely.geometry import Point
 from shapely.wkt import loads
 
 from fractopo_scripts.simulation.schema import describe_df_schema
+from pandera import DataFrameSchema
 
 GEOM_COL = "geometry"
 
@@ -119,18 +120,18 @@ def bins_to_dataframes(trace_bins, branch_bins):
     return trace_bin_df, branch_bin_df
 
 
-def save_numerical_data(
-    numerical_network_description,
-    target_centroid,
-    radius,
-    name,
-    results_path: Path,
+def create_describe_df(
+    target_centroid: Point,
+    numerical_network_description: dict,
+    name: str,
+    radius: float,
     amount_of_coverage: float,
-):
+    describe_df_schema: DataFrameSchema,
+) -> pd.DataFrame:
     """
-    Save numerical data of Network sampling.
+    Create DataFrame for network.
     """
-    curr_df = pd.DataFrame(
+    describe_df = pd.DataFrame(
         [
             {
                 GEOM_COL: target_centroid.wkt,
@@ -143,8 +144,29 @@ def save_numerical_data(
             }
         ]
     )
+    describe_df = describe_df_schema.validate(describe_df)
+    return describe_df
 
-    curr_df = describe_df_schema.validate(curr_df)
+
+def save_numerical_data(
+    numerical_network_description,
+    target_centroid,
+    radius,
+    name,
+    results_path: Path,
+    amount_of_coverage: float,
+):
+    """
+    Save numerical data of Network sampling.
+    """
+    curr_df = create_describe_df(
+        target_centroid=target_centroid,
+        name=name,
+        radius=radius,
+        numerical_network_description=numerical_network_description,
+        amount_of_coverage=amount_of_coverage,
+        describe_df_schema=describe_df_schema,
+    )
 
     if results_path.exists():
         df = read_csv(results_path)
@@ -295,20 +317,14 @@ def describe_random_network(
         )
     else:
         numerical_network_description = empty_numerical_network_description
-    describe_df = pd.DataFrame(
-        [
-            {
-                GEOM_COL: target_centroid.wkt,
-                **numerical_network_description,
-                "name": name,
-                "radius": radius,
-                "area": np.pi * radius ** 2,
-                "coverage": amount_of_coverage,
-                "relative coverage": amount_of_coverage / (np.pi * radius ** 2),
-            }
-        ]
+    describe_df = create_describe_df(
+        target_centroid=target_centroid,
+        name=name,
+        radius=radius,
+        numerical_network_description=numerical_network_description,
+        amount_of_coverage=amount_of_coverage,
+        describe_df_schema=describe_df_schema,
     )
-    describe_df = describe_df_schema.validate(describe_df)
     assert not describe_df.empty
     return describe_df
 
