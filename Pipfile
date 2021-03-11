@@ -14,12 +14,10 @@ sphinx-rtd-theme = "*"
 ipython = "*"
 
 [packages]
-fractopo = {git = "https://github.com/nialov/fractopo.git"}
+xlrd = {editable = true, path = "/home/nialov/nikke-projects/Pipenv_projects/fractopo"}
 click = "*"
 jupyterlab = "*"
 pandera = "*"
 
 [requires]
 python_version = "3.8"
-
-[pipenv]
