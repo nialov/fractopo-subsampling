@@ -315,6 +315,17 @@ def describe_random_network(
                 for key in numerical_network_description
             ]
         )
+        trace_boundary_counts, branch_boundary_counts = (
+            network.trace_boundary_intersect_count,
+            network.branch_boundary_intersect_count,
+        )
+        assert trace_boundary_counts is not None
+        assert branch_boundary_counts is not None
+        numerical_network_description = {
+            **numerical_network_description,
+            **trace_boundary_counts,
+            **branch_boundary_counts,
+        }
     else:
         numerical_network_description = empty_numerical_network_description
     describe_df = create_describe_df(
