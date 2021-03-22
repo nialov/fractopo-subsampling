@@ -54,8 +54,8 @@ class Utils:
     base_circle_reference_value_csv_path = Path("../results/base_reference_values.csv")
 
     renamed_params = {
-        "trace power_law exponent": "Trace Powerlaw Exponent",
-        "branch power_law exponent": "Branch Powerlaw Exponent",
+        "trace power_law exponent": "Trace Power-law Exponent",
+        "branch power_law exponent": "Branch Power-law Exponent",
     }
 
     selected_params = {
