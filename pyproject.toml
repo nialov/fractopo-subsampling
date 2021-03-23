@@ -11,7 +11,16 @@ doctest_optionflags =[
 
 filterwarnings =[]
 
+[tool.black]
+exclude = "fractopo_scripts/_version.py"
+
 [tool.isort]
 profile = "black"
 multi_line_output = 3
 src_paths = ["fractopo_scripts", "tests"]
+skip = "fractopo_scripts/_version.py"
+
+[tool.coverage.run]
+omit =[
+    "fractopo_scripts/_version.py",
+    ]
