@@ -132,7 +132,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=["click", "jupyterlab", "pandera"],  # Optional
+    install_requires=["fractopo==0.0.2", "geopandas", "click", "pandera"],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
@@ -142,15 +142,9 @@ setup(
     # Similar to `install_requires` above, these must be valid existing
     # projects.
     extras_require={
-        "dev": [
-            "pytest",
-            "coverage",
-            "nox",
-            "invoke",
-            "nbsphinx",
-            "sphinx",
-            "sphinx-rtd-theme",
-        ]
+        "dev": ["nox", "invoke", "jupyterlab", "ipython", "pytest",],
+        "docs": ["sphinx", "sphinx-rtd-theme", "nbsphinx"],
+        "coverage": ["coverage", "coverage-badge"],
     },  # Optional
     # If there are data files included in your packages that need to be
     # installed, specify them here.
@@ -162,7 +156,7 @@ setup(
     # will find and install the package correctly.
     # see https://python-packaging.readthedocs.io/en/latest/dependencies.html#packages-not-on-pypi
     #
-    dependency_links=["git+https://github.com/nialov/fractopo.git#egg=fractopo"],
+    dependency_links=[],
     # If using Python 2.6 or earlier, then these have to be included in
     # MANIFEST.in as well.
     # package_data={"sample": ["package_data.dat"]},  # Optional

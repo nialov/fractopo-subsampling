@@ -123,7 +123,11 @@ def sim(
     area_gdf = read_geofile(area_path)
     coverage_gdf = read_geofile(coverage_path)
     sampler = NetworkRandomSampler(
-        trace_gdf=trace_gdf, area_gdf=area_gdf, min_radius=5, snap_threshold=0.001
+        trace_gdf=trace_gdf,
+        area_gdf=area_gdf,
+        min_radius=5,
+        snap_threshold=0.001,
+        random_choice="area",
     )
 
     for _ in range(how_many):

@@ -13,11 +13,11 @@ from fractopo.analysis.network import Network
 from fractopo.general import pygeos_spatial_index, safe_buffer
 from matplotlib.figure import Figure
 from matplotlib.projections.polar import PolarAxes
+from pandera import DataFrameSchema
 from shapely.geometry import Point
 from shapely.wkt import loads
 
 from fractopo_scripts.simulation.schema import describe_df_schema
-from pandera import DataFrameSchema
 
 GEOM_COL = "geometry"
 
@@ -217,7 +217,7 @@ def save_branches_and_nodes(network: Network, other_results_path: Path):
         network.node_gdf.to_file(
             other_results_path / f"{network.name}_nodes.gpkg", driver="GPKG"
         )
-    except:
+    except Exception:
         logging.error(f"Failed to save branches and nodes to {other_results_path}.")
 
 

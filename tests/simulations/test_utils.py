@@ -1,11 +1,12 @@
 """
 Tests for fractopo_scripts.simulation.utils.
 """
-import tests
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
+
 import fractopo_scripts.simulation.utils as utils
+import tests
 
 
 def test_random_sample_of_circles():

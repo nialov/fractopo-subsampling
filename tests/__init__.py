@@ -4,11 +4,11 @@ Tests for fractopo_scripts.
 Contains most test parameters.
 """
 import tempfile
-import pandas as pd
 from functools import lru_cache
 from pathlib import Path
 
 import geopandas as gpd
+import pandas as pd
 from fractopo.general import read_geofile
 
 flato_traces_path_str = "tests/sample_data/Flato_20m_1_traces.gpkg"

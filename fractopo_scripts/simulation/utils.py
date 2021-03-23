@@ -2,13 +2,14 @@
 General utilities for simulation.
 """
 import random
-import numpy as np
-from pandas.core.groupby.generic import DataFrameGroupBy
 from pathlib import Path
-from typing import List, Dict, Union, Tuple, Sequence, Literal
-import pandas as pd
+from typing import Dict, List, Literal, Sequence, Tuple, Union
+
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 from matplotlib.axes import Axes
+from pandas.core.groupby.generic import DataFrameGroupBy
 
 
 class Utils:

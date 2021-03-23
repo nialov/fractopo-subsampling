@@ -4,19 +4,16 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pytest = "*"
-coverage = "*"
 nox = "*"
 invoke = "*"
-nbsphinx = "*"
-sphinx = "*"
-sphinx-rtd-theme = "*"
+jupyterlab = "*"
 ipython = "*"
+pytest = "*"
 
 [packages]
-xlrd = {editable = true, path = "/home/nialov/nikke-projects/Pipenv_projects/fractopo"}
+fractopo = "==0.0.2"
+geopandas = "*"
 click = "*"
-jupyterlab = "*"
 pandera = "*"
 
 [requires]

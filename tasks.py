@@ -6,8 +6,8 @@ Most tasks employ nox to create a virtual session for testing.
 from invoke import UnexpectedExit, task
 
 nox_parallel_sessions = (
-    "tests_strict",
-    "tests_lazy",
+    "tests_pipenv",
+    "tests_pip",
 )
 
 package_name = "fractopo_scripts"
@@ -37,7 +37,7 @@ def lint(c):
     c.run("nox --session lint")
 
 
-@task
+@task(pre=[requirements])
 def nox_parallel(c):
     """
     Run selected nox test suite sessions in parallel.
@@ -65,18 +65,17 @@ def nox_parallel(c):
     print(f"{len(results)} nox sessions ran succesfully.")
 
 
-@task
-def pytest(c):
+@task(pre=[requirements])
+def ci_test(c):
     """
-    Run tests with pytest in currently installed environment.
+    Test suite for continous integration testing.
 
-    Much faster than full `test` suite.
+    Installs with pip, tests with pytest and checks coverage with coverage.
     """
-    c.run(f"coverage run --include '{package_name}/**.py' -m pytest")
-    c.run("coverage report --fail-under 70")
+    c.run("nox --session tests_pip")
 
 
-@task(pre=[requirements, pytest, nox_parallel])
+@task(pre=[nox_parallel])
 def test(_):
     """
     Run tests.
@@ -94,7 +93,7 @@ def docs(c):
     c.run("nox --session docs")
 
 
-@task(pre=[test, lint, docs])
+@task(pre=[requirements, test, lint, docs])
 def make(_):
     """
     Make all.
