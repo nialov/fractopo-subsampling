@@ -15,17 +15,18 @@ def test_random_sample_of_circles():
     """
     df = pd.DataFrame(
         [
-            {"key": "a", "value": 1},
-            {"key": "a", "value": 1},
-            {"key": "b", "value": 2},
-            {"key": "b", "value": 2},
-            {"key": "b", "value": 2},
-            {"key": "b", "value": 2},
-            {"key": "b", "value": 2},
-            {"key": "b", "value": 2},
-            {"key": "b", "value": 1000},
+            {"key": "a", "area": 1},
+            {"key": "a", "area": 1},
+            {"key": "b", "area": 2},
+            {"key": "b", "area": 2},
+            {"key": "b", "area": 2},
+            {"key": "b", "area": 2},
+            {"key": "b", "area": 2},
+            {"key": "b", "area": 2},
+            {"key": "b", "area": 1000},
         ]
     ).astype({"key": "category"})
+    df["radius"] = np.sqrt(df["area"] / np.pi)
     grouped = df.groupby(by="key")
     circle_names_with_diameter = {"a": 50, "b": 1}
     single_result = utils.random_sample_of_circles(grouped, circle_names_with_diameter)
@@ -44,6 +45,7 @@ def test_random_sample_of_circles():
             name_counts[srs_key] = (
                 1 if srs_key not in name_counts else name_counts[srs_key] + 1
             )
+        yield result
     assert name_counts["a"] > name_counts["b"]
 
 

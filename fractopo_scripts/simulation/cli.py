@@ -127,7 +127,7 @@ def sim(
         area_gdf=area_gdf,
         min_radius=5,
         snap_threshold=0.001,
-        random_choice="area",
+        random_choice="radius",
     )
 
     for _ in range(how_many):

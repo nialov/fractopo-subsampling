@@ -3,7 +3,8 @@ General utilities for simulation.
 """
 import random
 from pathlib import Path
-from typing import Dict, List, Literal, Sequence, Tuple, Union
+from typing import Dict, List, Literal, Sequence, Tuple, Union, Optional
+from itertools import count
 
 import geopandas as gpd
 import numpy as np
@@ -29,7 +30,7 @@ class Utils:
         "Getaberget_20m_2_2_area": 50,
         "Getaberget_20m_1_1_area": 50,
         "Getaberget_20m_1_2_area": 40,  # 40 m
-        "Getaberget_20m_1_3_area": 10,  # 10 m
+        "Getaberget_20m_1_3_area": 20,  # 10 m
         "Getaberget_20m_1_4_area": 50,
         "Havsvidden_20m_1_area": 50,
     }
@@ -117,11 +118,44 @@ def random_sample_of_circles(
     for idx, (_, group) in enumerate(grouped):
         if idx not in which_idxs:
             continue
-        which_circle = random.randint(0, group.shape[0] - 1)
-        chosen.append(group.iloc[which_circle])
+        # radii = group["radius"].values
+        # radii_weights = normalize_and_invert_weights(
+        #     radii,
+        #     max_value=(Utils.circle_names_with_diameter[str(name)] / 2)
+        #     if name in Utils.circle_names_with_diameter
+        #     else None,
+        # )
+        # radii_weights = radii
+        indexer = count(0)
+        indexes = [next(indexer) for _ in group.index.values]
+        choice = random.choices(population=indexes, k=1)[0]
+        # which_circle = random.randint(0, group.shape[0] - 1)
+        srs = group.iloc[choice]
+        assert isinstance(srs, pd.Series)
+        chosen.append(srs)
 
     assert len(chosen) == how_many
     return chosen
+
+
+def normalize_and_invert_weights(
+    weights: Sequence[float], max_value: Optional[float] = None
+) -> Sequence[float]:
+    """
+    Normalize a list of weights and invert them.
+    """
+    # Return if empty
+    if len(weights) == 0:
+        return weights
+
+    # Get actual max value of weights if none is given
+    if max_value is None:
+        max_value = max(weights)
+    else:
+        assert max_value >= max(weights)
+
+    # Normalize and invert
+    return [1 - (val / max_value) for val in weights]
 
 
 def numpy_to_python_type(value):
