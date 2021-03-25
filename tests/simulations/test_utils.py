@@ -39,14 +39,16 @@ def test_random_sample_of_circles():
         for _ in range(100)
     ]
     name_counts = dict()
+    collect_results = []
     for result in results:
         for srs in result:
             srs_key = srs["key"]
             name_counts[srs_key] = (
                 1 if srs_key not in name_counts else name_counts[srs_key] + 1
             )
-        yield result
+            collect_results.append(result)
     assert name_counts["a"] > name_counts["b"]
+    return collect_results
 
 
 def test_aggregate_chosen_manual():
@@ -79,6 +81,3 @@ def test_aggregate_chosen(chosen, params_with_func, assume_result):
         if key not in assume_result:
             continue
         assert np.isclose(result[key], assume_result[key])
-
-
-# Hello

@@ -2,9 +2,9 @@
 General utilities for simulation.
 """
 import random
+from itertools import compress, count
 from pathlib import Path
-from typing import Dict, List, Literal, Sequence, Tuple, Union, Optional
-from itertools import count
+from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -81,7 +81,12 @@ def param_renamer(param: str):
 
 
 def random_sample_of_circles(
-    grouped: DataFrameGroupBy, circle_names_with_diameter: Dict[str, int]
+    grouped: DataFrameGroupBy,
+    circle_names_with_diameter: Dict[str, int],
+    min_circles: int = 1,
+    max_circles: int = None,
+    min_area: float = 0.0,
+    max_area: float = None,
 ) -> List[pd.Series]:
     """
     Get a random sample of circles from grouped simulation data.
@@ -89,33 +94,44 @@ def random_sample_of_circles(
     Both the amount of overall circles and which circles within each group
     is random. Data is grouped by target area name.
     """
-    names = list(grouped.groups.keys())
-    areas = [np.pi * (circle_names_with_diameter[name] / 2) ** 2 for name in names]
-    idxs = list(range(0, len(grouped)))
-    how_many = random.randint(1, len(grouped))
+    if max_circles is not None:
+        assert max_circles >= min_circles
 
+    # Area names
+    names = list(grouped.groups.keys())
+
+    # Get area of the base circles corresponding to area name
+    areas = [np.pi * (circle_names_with_diameter[name] / 2) ** 2 for name in names]
+
+    # All indexes
+    idxs = list(range(0, len(grouped)))
+
+    # "Randomly" choose how many circles
+    # Is constrained by given min_circles and max_circles
+    how_many = random.randint(
+        min_circles, len(grouped) if max_circles is None else max_circles
+    )
+
+    # Collect indexes of base circles
     which_idxs = []
     for _ in range(how_many):
-        choice = random.choices(population=idxs, weights=areas, k=1)[0]
-        while choice in which_idxs:
-            choice = random.choices(population=idxs, weights=areas, k=1)[0]
+        compressor = [idx not in which_idxs for idx in idxs]
+        possible_idxs = list(compress(idxs, compressor))
+        possible_areas = list(compress(areas, compressor))
+        choice = random.choices(population=possible_idxs, weights=possible_areas, k=1)[
+            0
+        ]
         which_idxs.append(choice)
-
-    # which = []
-    # for _ in range(how_many):
-    #     which_idx = random.randint(0, len(grouped) - 1)
-    #     # Do not choose duplicates and do base circle area weighting
-    #     while which_idx in which or not apply_area_weight(
-    #         names[which_idx], circle_names_with_diameter
-    #     ):
-    #         which_idx = random.randint(0, len(grouped) - 1)
-    #     which.append(which_idx)
 
     assert len(which_idxs) == how_many
 
+    # Collect the Series that are chosen
     chosen: List[pd.Series] = []
 
+    # Iterate over the DataFrameGroupBy dataframe groups
     for idx, (_, group) in enumerate(grouped):
+
+        # Skip if not chosen base circle previously
         if idx not in which_idxs:
             continue
         # radii = group["radius"].values
@@ -126,15 +142,40 @@ def random_sample_of_circles(
         #     else None,
         # )
         # radii_weights = radii
+
+        # Make continous index from 0
         indexer = count(0)
         indexes = [next(indexer) for _ in group.index.values]
+
+        # If min_area or max_area are given, the choices are filtered
+        # accordingly
+        if min_area > 0 or max_area is not None:
+
+            # Get circle areas
+            areas = group["area"].to_numpy()
+
+            # Solve max_area
+            max_area = np.max(areas) if max_area is None else max_area
+
+            # Filter out areas that do not fit within the range
+            area_compressor = [min_area > area > max_area for area in areas]
+
+            # Filter out indexes accordingly
+            indexes = list(compress(indexes, area_compressor))
+
+        # Choose from indexes
         choice = random.choices(population=indexes, k=1)[0]
-        # which_circle = random.randint(0, group.shape[0] - 1)
+
+        # Get the Series at choice index
         srs = group.iloc[choice]
         assert isinstance(srs, pd.Series)
+
+        # Collect
         chosen.append(srs)
 
     assert len(chosen) == how_many
+
+    # Return chosen subsampled circles from base circles
     return chosen
 
 
