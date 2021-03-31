@@ -4,7 +4,7 @@ General utilities for simulation.
 import random
 from itertools import compress, count
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -210,7 +210,7 @@ def numpy_to_python_type(value):
 
 
 def aggregate_chosen(
-    chosen: List[pd.Series], params_with_func: Dict[str, Literal["mean", "sum"]]
+    chosen: List[pd.Series], params_with_func: Dict[str, str]
 ) -> Dict[str, Union[float, int]]:
     """
     Aggregate a collection of simulation circles for params.
