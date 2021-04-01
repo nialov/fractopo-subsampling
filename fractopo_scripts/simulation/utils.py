@@ -4,7 +4,7 @@ General utilities for simulation.
 import random
 from itertools import compress, count
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union, Any
 
 import geopandas as gpd
 import numpy as np
@@ -50,10 +50,13 @@ class Utils:
         "Number of Traces": "sum",
         "Number of Branches": "sum",
         "radius": "sum",
+        "I": "sum",
+        "Y": "sum",
+        "X": "sum",
+        "Trace Boundary 1 Intersect Count": "sum",
+        "Trace Boundary 2 Intersect Count": "sum",
+        "Trace Boundary 0 Intersect Count": "sum",
     }
-
-    base_circle_ids_csv_path = Path("../results/base_circle_ids.csv")
-    base_circle_reference_value_csv_path = Path("../results/base_reference_values.csv")
 
     renamed_params = {
         "trace power_law exponent": "Trace Power-law Exponent",
@@ -158,11 +161,12 @@ def random_sample_of_circles(
             max_area = np.max(areas) if max_area is None else max_area
 
             # Filter out areas that do not fit within the range
-            area_compressor = [min_area > area > max_area for area in areas]
+            area_compressor = [min_area <= area <= max_area for area in areas]
 
             # Filter out indexes accordingly
             indexes = list(compress(indexes, area_compressor))
 
+        assert len(indexes) > 0
         # Choose from indexes
         choice = random.choices(population=indexes, k=1)[0]
 
@@ -211,7 +215,7 @@ def numpy_to_python_type(value):
 
 def aggregate_chosen(
     chosen: List[pd.Series], params_with_func: Dict[str, str]
-) -> Dict[str, Union[float, int]]:
+) -> Dict[str, Any]:
     """
     Aggregate a collection of simulation circles for params.
 
@@ -249,6 +253,20 @@ def constrain_radius(
         constrained.append(full_radius / 4 >= radius)
     assert len(constrained) == len(names) == len(radiuses)
     return constrained
+
+
+def radius_to_area(radius: float):
+    """
+    Convert circle radius to area.
+    """
+    return np.pi * radius ** 2
+
+
+def area_to_radius(area: float):
+    """
+    Convert circle area to radius.
+    """
+    return np.sqrt(area / np.pi)
 
 
 def filter_dataframe(
@@ -296,3 +314,34 @@ def label_point(
     Label points in plot.
     """
     [ax.text(x + 0.02, y, str(val), **text_kwargs) for x, y, val in zip(xs, ys, vals)]
+
+
+def cached_subsampling(
+    dataframe_grouped: DataFrameGroupBy,
+    iterations: int,
+    savepath: Path,
+    subsample_area_limits: Optional[Tuple[float, float]] = None,
+):
+    """
+    Perform subsampling.
+    """
+    if savepath.exists():
+        agg_df = pd.read_csv(savepath)
+    else:
+        agg_df = pd.DataFrame(
+            [
+                aggregate_chosen(
+                    random_sample_of_circles(
+                        dataframe_grouped,
+                        Utils.circle_names_with_diameter,
+                        min_area=subsample_area_limits[0],
+                        max_area=subsample_area_limits[1],
+                    ),
+                    params_with_func=Utils.params_with_func,
+                )
+                for _ in range(iterations)
+            ]
+        )
+        agg_df.to_csv(savepath, index=False)
+
+    return agg_df
