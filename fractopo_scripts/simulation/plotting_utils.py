@@ -7,6 +7,7 @@ from itertools import count
 import geopandas as gpd
 import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
+from matplotlib.figure import Figure
 import seaborn as sns
 import scipy.stats as stats
 import numpy as np
@@ -205,33 +206,51 @@ def grouped_boxplots(
     group_col_second: str,
     group_first_labels: Sequence[str],
     group_second_labels: Sequence[str],
+    figure_title: str,
+    multip_diff: float = 1.135,
+    outlier_proportion_threshold: float = 1.0,
 ):
     """
     Plot grouped boxplots.
     """
+    # Initialize figure and axes
+    fig: Figure
     fig, axes = plt.subplots(
         4, len(group_first_labels), figsize=utils.paper_figsize(0.85), sharey="row"
     )
 
+    # Set figure title
+    fig.suptitle(figure_title)
+
+    # Axes iterator
     def axes_generator(axes: np.ndarray):
         for ax in axes.flatten():
             yield ax
 
-    def circle_count_gen(circle_count_groups: Sequence[str]):
-        for count_str in circle_count_groups:
-            yield count_str
+    # Group label iterator
+    def group_label_gen(group_labels: Sequence[str]):
+        for group_label in group_labels:
+            yield group_label
 
+    # Init iterators
     ax_gen = axes_generator(axes=axes)
-    cc_gen = circle_count_gen(group_first_labels)
+    cc_gen = group_label_gen(group_first_labels)
 
+    # Group by group_col_first column
     grouped = aggregate_df.groupby(group_col_first)
-    # colors = ["black", "grey", "lightgrey"]
+
+    # Enumerate over parameters in reference_value_dict
     for i, param in enumerate(
         [param for param in reference_value_dict if param in aggregate_df.columns]
     ):
 
+        # Enumerate over the groups in grouped
         for j, (_, group) in enumerate(grouped):
+
+            # Generate next ax
             ax = next(ax_gen)
+
+            # Plot seaborn boxplot on ax
             ax = sns.boxplot(
                 data=group,
                 x=group_col_second,
@@ -241,26 +260,47 @@ def grouped_boxplots(
                 palette="Greys",
             )
 
-            # boxplot stats
+            # Enumerate over the second group labels
             for x_loc, label in enumerate(group_second_labels):
+
+                # Locate from current group only ones matching current label
                 data = group[param].loc[group[group_col_second] == label]
+
+                # Ignore empty
                 if data.shape[0] == 0:
                     continue
+
+                # Get boxplot parameters
                 fliershi, flierslo, whishi, whislo = boxplot_fliers(data)
-                multip_diff = 1.135
+
+                # Iterate over boxplot bottom and top parameters
                 for fliers, whis, plus in zip(
                     (fliershi, flierslo), (whishi, whislo), (True, False)
                 ):
+
+                    # Calculate the median
                     median = np.median(data)
+
+                    # Calculate whisker distance to median
                     whis_dist_to_median = abs(median - whis)
+
+                    # Calculate y location
                     y_loc = (
                         median + whis_dist_to_median * multip_diff
                         if plus
                         else median - whis_dist_to_median * multip_diff
                     )
 
+                    # Calculate proportion of outliers
                     proportion_of_fliers = 100 * (len(fliers) / data.shape[0])
-                    if proportion_of_fliers > 1.0 and data.shape[0] > 10:
+
+                    # Only plot outlier proportion of it fits criteria
+                    if (
+                        proportion_of_fliers > outlier_proportion_threshold
+                        and data.shape[0] > 10
+                    ):
+
+                        # Plot outlier proportion as text
                         ax.text(
                             x_loc,
                             y_loc,
@@ -271,8 +311,13 @@ def grouped_boxplots(
                             fontstyle="italic",
                         )
 
+            # Set y label
             ax.set_ylabel(utils.param_renamer(param))
-            ax.set_xlabel(r"Area ($1000\ m^2$)")
+
+            # Set x label
+            ax.set_xlabel(r"Total Area ($\times 10^3\ m^2$)")
+
+            # Set reference value line
             ax.axhline(
                 reference_value_dict[utils.param_renamer(param)],
                 linestyle="--",
@@ -291,7 +336,10 @@ def grouped_boxplots(
             if j > 0:
                 ax.set_ylabel("")
 
+    # Adjust subplots
     plt.subplots_adjust(hspace=0.1, wspace=0.1)
+
+    # Remove bottom axes spine
     sns.despine(left=False, bottom=True)
     return fig
 
