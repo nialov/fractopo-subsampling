@@ -335,7 +335,9 @@ def get_best_value(values: pd.DataFrame, col: str, radius: str):
         raise ValueError()
 
 
-def normalized_param_plots(param: str, dataframe_grouped: DataFrameGroupBy):
+def normalized_param_plots(
+    param: str, dataframe_grouped: DataFrameGroupBy, example: bool = True
+):
     """
     Plot radius or area normalized plots of param values.
     """
@@ -377,6 +379,7 @@ def normalized_param_plots(param: str, dataframe_grouped: DataFrameGroupBy):
             hue="radius Cat",
             ax=axes[1],
         )
+        if example:
             break
 
     for ax in axes:
