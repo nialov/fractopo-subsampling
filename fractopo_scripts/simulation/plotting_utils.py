@@ -216,11 +216,11 @@ def grouped_boxplots(
     # Initialize figure and axes
     fig: Figure
     fig, axes = plt.subplots(
-        4, len(group_first_labels), figsize=utils.paper_figsize(0.85), sharey="row"
+        4, len(group_first_labels), figsize=utils.paper_figsize(0.8), sharey="row"
     )
 
     # Set figure title
-    fig.suptitle(figure_title)
+    # fig.suptitle(figure_title)
 
     # Axes iterator
     def axes_generator(axes: np.ndarray):
@@ -656,3 +656,35 @@ def plot_distribution(
 
     # Set param name nicely
     ax.set_xlabel(utils.param_renamer(param))
+
+
+def plot_group_pair_counts(
+    agg_df: pd.DataFrame,
+    x: str,
+    hue: str,
+    xlabel: str,
+    ylabel: str,
+    title: str,
+    legend_title: str,
+):
+    """
+    Plot group pair counts.
+    """
+    fig, ax = plt.subplots(figsize=(7, 3))
+    ax = sns.countplot(
+        data=agg_df,
+        x=x,
+        hue=hue,
+        ax=ax,
+        linewidth=1,
+        linestyle="-",
+        edgecolor="black",
+        palette="Greys",
+    )
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+    ax.set_title(title)
+    legend = ax.legend()
+    legend.set_title(legend_title)
+
+    return fig
