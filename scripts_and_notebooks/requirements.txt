@@ -1,0 +1,12 @@
+black-nb
+click
+flake8-nb
+invoke
+organize-tool
+jupyterlab
+papermill
+pandera
+pytest
+tabulate
+fractopo==0.0.2
+git+git://github.com/nialov/fractopo-subsampling@master#egg=fractopo-subsampling

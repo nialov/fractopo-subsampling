@@ -1,5 +1,5 @@
 """
-General utilities for simulation.
+General utilities for subsampling.
 """
 import random
 from itertools import compress, count
@@ -18,22 +18,6 @@ class Utils:
     """
     General selection, column names, etc. data.
     """
-
-    circle_names_with_diameter = {
-        "Getaberget_20m_4_3_area": 50,
-        "Getaberget_20m_9_2_area": 50,
-        "Getaberget_20m_8_3_area": 50,
-        "Getaberget_20m_7_1_area": 50,
-        "Getaberget_20m_7_2_area": 20,  # 20 m
-        "Getaberget_20m_5_1_area": 50,
-        "Getaberget_20m_2_1_area": 40,  # 40 m
-        "Getaberget_20m_2_2_area": 50,
-        "Getaberget_20m_1_1_area": 50,
-        "Getaberget_20m_1_2_area": 40,  # 40 m
-        "Getaberget_20m_1_3_area": 20,  # 10 m
-        "Getaberget_20m_1_4_area": 50,
-        "Havsvidden_20m_1_area": 50,
-    }
 
     radius = "radius"
     relative_coverage = "relative coverage"
@@ -92,7 +76,7 @@ def random_sample_of_circles(
     max_area: float = None,
 ) -> List[pd.Series]:
     """
-    Get a random sample of circles from grouped simulation data.
+    Get a random sample of circles from grouped subsampled data.
 
     Both the amount of overall circles and which circles within each group
     is random. Data is grouped by target area name.
@@ -217,9 +201,9 @@ def aggregate_chosen(
     chosen: List[pd.Series], params_with_func: Dict[str, str]
 ) -> Dict[str, Any]:
     """
-    Aggregate a collection of simulation circles for params.
+    Aggregate a collection of subsampled circles for params.
 
-    Weights averages by the area of each simulation circle.
+    Weights averages by the area of each subsampled circle.
     """
     total_area = numpy_to_python_type(sum([srs["area"] for srs in chosen]))
     assert isinstance(total_area, (float, int))

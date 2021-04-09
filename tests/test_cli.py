@@ -1,5 +1,5 @@
 """
-Tests for simulation.cli.py.
+Tests for cli.py.
 """
 import traceback
 from pathlib import Path
@@ -8,9 +8,9 @@ import pandas as pd
 import pytest
 from click.testing import CliRunner
 
-import fractopo_scripts.simulation.cli as cli
-import fractopo_scripts.simulation.fractopo_network as fn
-import fractopo_scripts.simulation.schema as schema
+import fractopo_subsampling.cli as cli
+import fractopo_subsampling.network_scripts as network_scripts
+import fractopo_subsampling.schema as schema
 import tests
 
 

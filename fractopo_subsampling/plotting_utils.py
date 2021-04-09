@@ -2,7 +2,7 @@
 Plotting utilities.
 """
 import warnings
-import fractopo_scripts.simulation.utils as utils
+import fractopo_subsampling.utils as utils
 from itertools import count
 import geopandas as gpd
 import pandas as pd
@@ -206,7 +206,6 @@ def grouped_boxplots(
     group_col_second: str,
     group_first_labels: Sequence[str],
     group_second_labels: Sequence[str],
-    figure_title: str,
     multip_diff: float = 1.135,
     outlier_proportion_threshold: float = 1.0,
 ):

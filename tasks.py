@@ -10,7 +10,7 @@ nox_parallel_sessions = (
     "tests_pip",
 )
 
-package_name = "fractopo_scripts"
+package_name = "fractopo_subsampling"
 
 
 @task

@@ -1,5 +1,5 @@
 """
-Tests for fractopo_scripts.
+Tests for fractopo_subsampling.
 
 Contains most test parameters.
 """

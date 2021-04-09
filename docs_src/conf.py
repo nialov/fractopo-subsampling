@@ -20,12 +20,12 @@ sys.path.insert(0, os.path.abspath("."))
 
 # -- Project information -----------------------------------------------------
 
-project = "fractopo_scripts".replace("_", "-")
+project = "fractopo_subsampling".replace("_", "-")
 copyright = "2021, Nikolas Ovaskainen"
 author = "Nikolas Ovaskainen"
 
 # The full version, including alpha/beta/rc tags
-imported_package = import_module("fractopo_scripts")  # noqa
+imported_package = import_module("fractopo_subsampling")  # noqa
 
 release = imported_package.__version__  # type: ignore
 

@@ -1,5 +1,5 @@
 """
-Command line interface of simulation scripts.
+Command line interface of subsampling scripts.
 """
 import logging
 from pathlib import Path
@@ -8,12 +8,12 @@ import click
 from fractopo.analysis.random_sampling import NetworkRandomSampler
 from fractopo.general import read_geofile
 
-from fractopo_scripts.simulation.fractopo_network import (
+from fractopo_subsampling.network_scripts import (
     analyze,
     assess_coverage,
     describe_random_network,
     gather_results,
-    gather_sim_results,
+    gather_subsampling_results,
     save_azimuth_bin_data,
     save_csv,
     save_describe_df,
@@ -102,7 +102,7 @@ def baseanalyze(
 @click.argument("coverage_path_str", type=click.Path(exists=True, dir_okay=False))
 @click.option("how_many", "--how-many", type=click.IntRange(1, 100), default=1)
 @click.option("hashname", "--hashname", is_flag=True, default=False)
-def sim(
+def subsampled(
     traces_path_str: str,
     area_path_str: str,
     results_path_str: str,
@@ -112,7 +112,7 @@ def sim(
     hashname: bool,
 ):
     """
-    Simulate single network sampling within the given sample area.
+    Conduct single network subsampling within the given sample area.
     """
     traces_path = Path(traces_path_str)
     area_path = Path(area_path_str)
@@ -168,13 +168,13 @@ def sim(
 @main.command()
 @click.argument("results_path_str", type=click.Path(exists=True, dir_okay=True))
 @click.argument("gather_path_str", type=click.Path(dir_okay=False))
-def gathersim(results_path_str: str, gather_path_str: str):
+def gather_subsampling(results_path_str: str, gather_path_str: str):
     """
-    Gather simulation results.
+    Gather subsampling results.
     """
     results_path = Path(results_path_str)
     gather_path = Path(gather_path_str)
-    concatted = gather_sim_results(results_path=results_path)
+    concatted = gather_subsampling_results(results_path=results_path)
     save_csv(concatted, gather_path)
     concatted.to_pickle(gather_path.with_suffix(".pickle"))
     print(f"Saved concatted data at {gather_path}.")

@@ -1,5 +1,5 @@
 """
-A setuptools based setup module for fractopo_scripts.
+A setuptools based setup module for fractopo_subsampling.
 See:
 https://packaging.python.org/guides/distributing-packages-using-setuptools/
 https://github.com/pypa/sampleproject
@@ -26,7 +26,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as readme:
     long_description = readme.read()
 
-package_name = "fractopo_scripts"
+package_name = "fractopo_subsampling"
 project_url = f"https://github.com/nialov/{package_name.replace('_', '-')}"
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
@@ -113,7 +113,7 @@ setup(
     # project page. What does your project relate to?
     #
     # Note that this is a string of words separated by whitespace, not a list.
-    keywords="data analysis spatial geology brittle simulation sampling",  # Optional
+    keywords="data analysis spatial geology brittle subsampling",  # Optional
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
     #
@@ -124,7 +124,8 @@ setup(
     #   py_modules=["my_module"],
     #
     packages=find_packages(
-        exclude=["contrib", "docs", "tests"], include=[package_name],
+        exclude=["contrib", "docs", "tests"],
+        include=[package_name],
     ),  # Required
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -148,7 +149,13 @@ setup(
     # Similar to `install_requires` above, these must be valid existing
     # projects.
     extras_require={
-        "dev": ["nox", "invoke", "jupyterlab", "ipython", "pytest",],
+        "dev": [
+            "nox",
+            "invoke",
+            "jupyterlab",
+            "ipython",
+            "pytest",
+        ],
         "docs": ["sphinx", "sphinx-rtd-theme", "nbsphinx"],
         "coverage": ["coverage", "coverage-badge"],
     },  # Optional

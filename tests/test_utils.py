@@ -1,11 +1,11 @@
 """
-Tests for fractopo_scripts.simulation.utils.
+Tests for fractopo_subsampling.utils.
 """
 import numpy as np
 import pandas as pd
 import pytest
 
-import fractopo_scripts.simulation.utils as utils
+import fractopo_subsampling.utils as utils
 import tests
 
 

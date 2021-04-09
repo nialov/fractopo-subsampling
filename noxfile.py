@@ -9,7 +9,7 @@ from typing import List
 import nox
 
 # Variables
-package_name = "fractopo_scripts"
+package_name = "fractopo_subsampling"
 
 # Paths
 docs_apidoc_dir_path = Path("docs_src/apidoc")

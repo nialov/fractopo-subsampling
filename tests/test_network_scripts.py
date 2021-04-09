@@ -1,10 +1,10 @@
 """
-Tests for fractopo_network.
+Tests for network_scripts.
 """
 from fractopo.analysis.network import Network
 
 import tests
-from fractopo_scripts.simulation import fractopo_network
+from fractopo_subsampling import network_scripts
 
 
 def test_empty_numerical_desc_manual():
@@ -20,7 +20,7 @@ def test_empty_numerical_desc_manual():
     )
     assert all(
         [
-            key in fractopo_network.empty_numerical_desc()
+            key in network_scripts.empty_numerical_desc()
             for key in network.numerical_network_description()
         ]
     )
@@ -39,4 +39,4 @@ def test_plaifiny_rose_plot_manual():
     )
 
     _, fig, ax = network.plot_trace_azimuth()
-    fractopo_network.plainify_rose_plot(fig, ax)
+    network_scripts.plainify_rose_plot(fig, ax)

@@ -17,7 +17,7 @@ from pandera import DataFrameSchema
 from shapely.geometry import Point
 from shapely.wkt import loads
 
-from fractopo_scripts.simulation.schema import describe_df_schema
+from fractopo_subsampling.schema import describe_df_schema
 
 GEOM_COL = "geometry"
 
@@ -62,9 +62,9 @@ def gather_results(results_path: Path) -> gpd.GeoDataFrame:
     return gdf
 
 
-def gather_sim_results(results_path: Path) -> pd.DataFrame:
+def gather_subsampling_results(results_path: Path) -> pd.DataFrame:
     """
-    Gather simulation results.
+    Gather subsampling results.
     """
     if not (results_path.exists() and results_path.is_dir()):
         raise NotADirectoryError(f"Expected {results_path} dir to exist.")
