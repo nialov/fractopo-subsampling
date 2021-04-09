@@ -1,7 +1,7 @@
 [tool.pytest.ini_options]
 testpaths =[
     "tests",
-    "fractopo_scripts",
+    "fractopo_subsampling",
     ]
 addopts = "--doctest-modules --pdbcls=IPython.terminal.debugger:Pdb"
 doctest_optionflags =[
@@ -12,15 +12,15 @@ doctest_optionflags =[
 filterwarnings =[]
 
 [tool.black]
-exclude = "fractopo_scripts/_version.py"
+exclude = "fractopo_subsampling/_version.py"
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-src_paths = ["fractopo_scripts", "tests"]
-skip = "fractopo_scripts/_version.py"
+src_paths = ["fractopo_subsampling", "tests"]
+skip = "fractopo_subsampling/_version.py"
 
 [tool.coverage.run]
 omit =[
-    "fractopo_scripts/_version.py",
+    "fractopo_subsampling/_version.py",
     ]

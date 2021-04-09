@@ -1,2 +1,2 @@
 include versioneer.py
-include fractopo_scripts/_version.py
+include fractopo_subsampling/_version.py
