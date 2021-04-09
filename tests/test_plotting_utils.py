@@ -6,6 +6,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pytest
 from matplotlib.axes._axes import Axes
+from matplotlib.figure import Figure
 
 import fractopo_subsampling.plotting_utils as plotting_utils
 import tests
@@ -90,3 +91,85 @@ def test_colorgen():
 
         if idx > 15:
             break
+
+
+@pytest.mark.parametrize("group", tests.test_plot_group_pair_boxplots_params())
+def test_plot_group_pair_boxplots(make_plot, group):
+    """
+    Test plot_group_pair_boxplots.
+    """
+    group_col_second = tests.group_col_second
+    param = tests.param
+    group_second_labels = ("1-2", "2-3")
+    multip_diff = 1.1
+    outlier_proportion_threshold = 1.0
+    reference_value_dict = {param: 2.5}
+    i = 0
+    j = 0
+    _, ax = make_plot
+    ax_gen = (an_ax for an_ax in [ax])
+    cc_gen = (val for val in ["2-4"])
+    result = plotting_utils.plot_group_pair_boxplots(
+        group=group,
+        group_col_second=group_col_second,
+        group_second_labels=group_second_labels,
+        reference_value_dict=reference_value_dict,
+        multip_diff=multip_diff,
+        outlier_proportion_threshold=outlier_proportion_threshold,
+        i=i,
+        j=j,
+        ax_gen=ax_gen,
+        cc_gen=cc_gen,
+        param=param,
+    )
+
+    assert isinstance(result, Axes)
+
+
+@pytest.mark.parametrize("aggregate_df", tests.test_plot_group_pair_boxplots_params())
+def test_grouped_boxplots(aggregate_df):
+    """
+    Test plot_group_pair_boxplots.
+    """
+    group_col_first = tests.group_col_first
+    group_col_second = tests.group_col_second
+    group_first_labels = ("1-2", "2-3")
+    group_second_labels = ("1-2", "2-3")
+    multip_diff = 1.1
+    outlier_proportion_threshold = 1.0
+    reference_value_dict = {tests.param: 2.5}
+    try:
+        result = plotting_utils.grouped_boxplots(
+            aggregate_df=aggregate_df,
+            reference_value_dict=reference_value_dict,
+            group_col_first=group_col_first,
+            group_col_second=group_col_second,
+            group_first_labels=group_first_labels,
+            group_second_labels=group_second_labels,
+            multip_diff=multip_diff,
+            outlier_proportion_threshold=outlier_proportion_threshold,
+        )
+    except Exception:
+        plt.close()
+        raise
+    plt.close()
+
+    assert isinstance(result, Figure)
+
+
+@pytest.mark.parametrize("agg_df", tests.test_plot_group_pair_boxplots_params())
+def test_group_pair_counts(agg_df):
+    """
+    Test group_pair_counts.
+    """
+    result = plotting_utils.plot_group_pair_counts(
+        agg_df=agg_df,
+        x=tests.group_col_first,
+        hue=tests.group_col_second,
+        xlabel="xlabel",
+        ylabel="ylabel",
+        title="sometitle",
+        legend_title="legend_title",
+    )
+
+    assert isinstance(result, Figure)

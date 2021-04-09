@@ -19,6 +19,10 @@ flato_traces_path = Path(flato_traces_path_str)
 flato_area_path = Path(flato_area_path_str)
 shoreline_path = Path("misc/shoreline.geojson")
 
+param = "param"
+group_col_second = "group_col_second"
+group_col_first = "group_col_first"
+
 
 @lru_cache(maxsize=None)
 def flato_traces_gdf(flato_traces_path: Path = flato_traces_path) -> gpd.GeoDataFrame:
@@ -254,3 +258,21 @@ def test_preprocess_analysis_points_params():
         )
 
     return params
+
+
+@lru_cache(maxsize=None)
+def test_plot_group_pair_boxplots_params():
+    """
+    Params for plot_group_pair_boxplots.
+    """
+    dfs = [
+        pd.DataFrame(
+            {
+                group_col_first: ["1-2", "2-3", "1-2", "1-2", "2-3"],
+                group_col_second: ["1-2", "2-3", "1-2", "1-2", "2-3"],
+                param: [1, 2, 3, 4, 3],
+            }
+        )
+    ]
+
+    return dfs

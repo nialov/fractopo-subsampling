@@ -240,7 +240,7 @@ def plot_group_pair_boxplots(
     j: int,
     ax_gen: Generator,
     cc_gen: Generator,
-):
+) -> Axes:
     """
     Plot boxplots for group pair.
     """
@@ -332,6 +332,8 @@ def plot_group_pair_boxplots(
     # second and third col
     if j > 0:
         ax.set_ylabel("")
+
+    return ax
 
 
 def grouped_boxplots(
@@ -434,6 +436,17 @@ def circle_count_limiting(
 def get_best_value(values: pd.DataFrame, col: str, radius: str):
     """
     Naively detect best estimate from values dataframe.
+
+    >>> df = pd.DataFrame(
+    ...             {
+    ...                 "x": [10, 15, 123, -4],
+    ...                 "radius": [2, 1, 1, -4],
+    ...                 "name": ["a", "b", "c", "d"],
+    ...             }
+    ...         )
+    >>> get_best_value(df, "x", "radius")
+    10
+
     """
     best_value = values[col].loc[values[radius].nlargest(1).index]
     if best_value.shape[0] == 1:
