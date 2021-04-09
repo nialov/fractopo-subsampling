@@ -3,7 +3,7 @@ Plotting utilities.
 """
 import warnings
 from itertools import count
-from typing import Dict, Sequence, Tuple
+from typing import Dict, Generator, Sequence, Tuple, Union
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
+from matplotlib.axes import Axes
 from matplotlib.cbook import boxplot_stats
 from matplotlib.figure import Figure
 from pandas.core.groupby import DataFrameGroupBy
@@ -22,18 +23,34 @@ dist_continous = [
 ]
 
 
-def base_circle_id_coords(filtered):
+def base_circle_id_coords(filtered: Union[pd.DataFrame, gpd.GeoDataFrame]):
     """
-    Id analysis points by x.
+    Id analysis points ordered by x coordinate.
+
+    >>> df = pd.DataFrame(
+    ...             {
+    ...                 "x": [10, 15, 123, -4],
+    ...                 "y": [2, 1, 1, -4],
+    ...                 "name": ["a", "b", "c", "d"],
+    ...             }
+    ...         )
+    >>> base_circle_id_coords(df)
+    [(-4, -4, 'd'), (10, 2, 'a'), (15, 1, 'b'), (123, 1, 'c')]
+
     """
     coords = zip(filtered["x"].values, filtered["y"].values, filtered["name"].values)
-    coords = sorted(coords, key=lambda vals: vals[0])
+    coords = sorted(coords, key=lambda vals: vals[0])  # type: ignore
     return coords
 
 
-def base_circle_id_dict(coords):
+def base_circle_id_dict(coords: list):
     """
     Make dict out of ided points.
+
+    >>> coords = [(-4, -4, 'd'), (10, 2, 'a'), (15, 1, 'b'), (123, 1, 'c')]
+    >>> base_circle_id_dict(coords)
+    {'d': 1, 'a': 2, 'b': 3, 'c': 4}
+
     """
     counter = count(1)
     id_dict = dict()
@@ -56,7 +73,7 @@ def label_ids_to_map(coords, ax):
     return ax
 
 
-def plot_base_circles(filtered, coords, ax=None):
+def plot_base_circles(filtered: gpd.GeoDataFrame, coords: list, ax=None):
     """
     Plot base circle locations.
     """
@@ -73,7 +90,7 @@ def plot_base_circles(filtered, coords, ax=None):
     return ax
 
 
-def plot_shoreline(shoreline, ax):
+def plot_shoreline(shoreline: gpd.GeoDataFrame, ax):
     """
     Plot shoreline.
     """
@@ -81,7 +98,9 @@ def plot_shoreline(shoreline, ax):
     return ax
 
 
-def plot_base_circle_map(filtered, shoreline, ax=None):
+def plot_base_circle_map(
+    filtered: gpd.GeoDataFrame, shoreline: gpd.GeoDataFrame, ax=None
+):
     """
     Plot map with base circles and shoreline.
     """
@@ -95,15 +114,20 @@ def plot_base_circle_map(filtered, shoreline, ax=None):
     return ax
 
 
-def preprocess_analysis_points(analysis_points: gpd.GeoDataFrame):
+def preprocess_analysis_points(
+    analysis_points: gpd.GeoDataFrame,
+    circle_names_with_diameter: Dict[str, float],
+    filter_radius: Tuple[float, float],
+    relative_coverage_threshold: float,
+):
     """
     Preprocess and filter Getaberget base circle analysis points.
     """
     filtered = utils.filter_dataframe(
         analysis_points,
-        list(utils.Utils.circle_names_with_diameter),
-        filter_radius=(5, 51),
-        relative_coverage_threshold=0.11,
+        list(circle_names_with_diameter),
+        filter_radius=filter_radius,
+        relative_coverage_threshold=relative_coverage_threshold,
     )
     filtered["x"] = [point.x for point in filtered.geometry.values]
     filtered["y"] = [point.y for point in filtered.geometry.values]
@@ -136,7 +160,7 @@ def test_all_dists(data, list_of_dists):
     return results
 
 
-def plot_dist(data, dist_str, ax):
+def plot_dist(data, dist_str: str, ax: Axes):
     """
     Plot a scipy distribution with data.
     """
@@ -190,6 +214,9 @@ def boxplot_fliers(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Get matplotlib boxplot flier data.
+
+    >>> boxplot_fliers(np.array([1, 2, 4, 56, 56, 1, 324, 431, 23]))
+    (array([324, 431]), array([], dtype=int64), 56, 1)
     """
     assert data.ndim == 1
     data_stats = boxplot_stats(data)
@@ -199,6 +226,112 @@ def boxplot_fliers(
     whishi, whislo = bstats["whishi"], bstats["whislo"]
     fliershi, flierslo = fliers[fliers >= whishi], fliers[fliers <= whislo]
     return fliershi, flierslo, whishi, whislo
+
+
+def plot_group_pair_boxplots(
+    group: pd.DataFrame,
+    param: str,
+    group_col_second: str,
+    group_second_labels: Sequence[str],
+    multip_diff: float,
+    outlier_proportion_threshold: float,
+    reference_value_dict: Dict[str, float],
+    i: int,
+    j: int,
+    ax_gen: Generator,
+    cc_gen: Generator,
+):
+    """
+    Plot boxplots for group pair.
+    """
+    # Generate next ax
+    ax = next(ax_gen)
+
+    # Plot seaborn boxplot on ax
+    ax = sns.boxplot(
+        data=group,
+        x=group_col_second,
+        y=param,
+        ax=ax,
+        showfliers=False,
+        palette="Greys",
+    )
+
+    # Enumerate over the second group labels
+    for x_loc, label in enumerate(group_second_labels):
+
+        # Locate from current group only ones matching current label
+        data = group[param].loc[group[group_col_second] == label]
+
+        # Ignore empty
+        if data.shape[0] == 0:
+            continue
+
+        # Get boxplot parameters
+        fliershi, flierslo, whishi, whislo = boxplot_fliers(data)
+
+        # Iterate over boxplot bottom and top parameters
+        for fliers, whis, plus in zip(
+            (fliershi, flierslo), (whishi, whislo), (True, False)
+        ):
+
+            # Calculate the median
+            median = np.median(data)
+
+            # Calculate whisker distance to median
+            whis_dist_to_median = abs(median - whis)
+
+            # Calculate y location
+            y_loc = (
+                median + whis_dist_to_median * multip_diff
+                if plus
+                else median - whis_dist_to_median * multip_diff
+            )
+
+            # Calculate proportion of outliers
+            proportion_of_fliers = 100 * (len(fliers) / data.shape[0])
+
+            # Only plot outlier proportion of it fits criteria
+            if (
+                proportion_of_fliers > outlier_proportion_threshold
+                and data.shape[0] > 10
+            ):
+
+                # Plot outlier proportion as text
+                ax.text(
+                    x_loc,
+                    y_loc,
+                    "{:.1f}%".format(proportion_of_fliers),
+                    ha="center",
+                    va="center",
+                    fontsize=7,
+                    fontstyle="italic",
+                )
+
+    # Set y label
+    ax.set_ylabel(utils.param_renamer(param))
+
+    # Set x label
+    ax.set_xlabel(r"Total Area ($\times 10^3\ m^2$)")
+
+    # Set reference value line
+    ax.axhline(
+        reference_value_dict[utils.param_renamer(param)],
+        linestyle="--",
+        zorder=1000,
+        color="black",
+    )
+
+    # not last row
+    if i < 3:
+        ax.tick_params(axis="x", bottom=False, labelbottom=False)
+        ax.set_xlabel("")
+    # first row
+    if i == 0:
+        ax.set_title(next(cc_gen))
+    # second and third col
+    if j > 0:
+        ax.set_ylabel("")
 
 
 def grouped_boxplots(
@@ -248,94 +381,19 @@ def grouped_boxplots(
         # Enumerate over the groups in grouped
         for j, (_, group) in enumerate(grouped):
 
-            # Generate next ax
-            ax = next(ax_gen)
-
-            # Plot seaborn boxplot on ax
-            ax = sns.boxplot(
-                data=group,
-                x=group_col_second,
-                y=param,
-                ax=ax,
-                showfliers=False,
-                palette="Greys",
+            plot_group_pair_boxplots(
+                group=group,
+                param=param,
+                group_col_second=group_col_second,
+                group_second_labels=group_second_labels,
+                multip_diff=multip_diff,
+                outlier_proportion_threshold=outlier_proportion_threshold,
+                reference_value_dict=reference_value_dict,
+                i=i,
+                j=j,
+                ax_gen=ax_gen,
+                cc_gen=cc_gen,
             )
-
-            # Enumerate over the second group labels
-            for x_loc, label in enumerate(group_second_labels):
-
-                # Locate from current group only ones matching current label
-                data = group[param].loc[group[group_col_second] == label]
-
-                # Ignore empty
-                if data.shape[0] == 0:
-                    continue
-
-                # Get boxplot parameters
-                fliershi, flierslo, whishi, whislo = boxplot_fliers(data)
-
-                # Iterate over boxplot bottom and top parameters
-                for fliers, whis, plus in zip(
-                    (fliershi, flierslo), (whishi, whislo), (True, False)
-                ):
-
-                    # Calculate the median
-                    median = np.median(data)
-
-                    # Calculate whisker distance to median
-                    whis_dist_to_median = abs(median - whis)
-
-                    # Calculate y location
-                    y_loc = (
-                        median + whis_dist_to_median * multip_diff
-                        if plus
-                        else median - whis_dist_to_median * multip_diff
-                    )
-
-                    # Calculate proportion of outliers
-                    proportion_of_fliers = 100 * (len(fliers) / data.shape[0])
-
-                    # Only plot outlier proportion of it fits criteria
-                    if (
-                        proportion_of_fliers > outlier_proportion_threshold
-                        and data.shape[0] > 10
-                    ):
-
-                        # Plot outlier proportion as text
-                        ax.text(
-                            x_loc,
-                            y_loc,
-                            "{:.1f}%".format(proportion_of_fliers),
-                            ha="center",
-                            va="center",
-                            fontsize=7,
-                            fontstyle="italic",
-                        )
-
-            # Set y label
-            ax.set_ylabel(utils.param_renamer(param))
-
-            # Set x label
-            ax.set_xlabel(r"Total Area ($\times 10^3\ m^2$)")
-
-            # Set reference value line
-            ax.axhline(
-                reference_value_dict[utils.param_renamer(param)],
-                linestyle="--",
-                zorder=1000,
-                color="black",
-            )
-
-            # not last row
-            if i < 3:
-                ax.tick_params(axis="x", bottom=False, labelbottom=False)
-                ax.set_xlabel("")
-            # first row
-            if i == 0:
-                ax.set_title(next(cc_gen))
-            # second and third col
-            if j > 0:
-                ax.set_ylabel("")
 
     # Adjust subplots
     plt.subplots_adjust(hspace=0.1, wspace=0.1)

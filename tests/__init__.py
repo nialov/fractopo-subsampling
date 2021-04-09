@@ -8,13 +8,16 @@ from functools import lru_cache
 from pathlib import Path
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 from fractopo.general import read_geofile
+from shapely.geometry import Point
 
 flato_traces_path_str = "tests/sample_data/Flato_20m_1_traces.gpkg"
 flato_area_path_str = "tests/sample_data/Flato_20m_1_area.gpkg"
 flato_traces_path = Path(flato_traces_path_str)
 flato_area_path = Path(flato_area_path_str)
+shoreline_path = Path("misc/shoreline.geojson")
 
 
 @lru_cache(maxsize=None)
@@ -33,6 +36,15 @@ def flato_area_gdf(flato_area_path: Path = flato_area_path) -> gpd.GeoDataFrame:
     """
     area = read_geofile(flato_area_path)
     return area
+
+
+@lru_cache(maxsize=None)
+def shoreline_gdf(shoreline_path: Path = shoreline_path) -> gpd.GeoDataFrame:
+    """
+    Get shoreline GeoDataFrame.
+    """
+    shoreline = read_geofile(shoreline_path)
+    return shoreline
 
 
 def test_main_params():
@@ -174,3 +186,71 @@ def test_aggregate_chosen_params():
             assume_result={"intensity": 0.66666666, "hello": 11},
         ),
     ]
+
+
+@lru_cache(maxsize=None)
+def test_base_circle_id_coords_params():
+    """
+    Params for test_base_circle_id_coords.
+    """
+    dfs = [
+        pd.DataFrame(
+            {
+                "x": [10, 15, 123, -4],
+                "y": [2, 1, 1, -4],
+                "name": ["a", "b", "c", "d"],
+                "radius": [25.0, 25.0, 25.0, 25.0],
+                "relative coverage": [0.0, 0.0, 0.0, 0.001],
+            }
+        )
+    ]
+
+    processed = []
+    for df in dfs:
+        df["area"] = np.pi * df["radius"] ** 2
+        processed.append(df)
+    return processed
+
+
+@lru_cache(maxsize=None)
+def point_analysis_gdf():
+    """
+    Params for test_base_circle_id_coords.
+    """
+    gdfs = []
+    for df in test_base_circle_id_coords_params():
+        gdf = gpd.GeoDataFrame(df)
+        gdf["points"] = [Point(x, y) for x, y in zip(df["x"].values, df["y"].values)]
+        gdf = gdf.set_geometry(col="points", drop=True)
+        gdfs.append(gdf)
+    return gdfs
+
+
+@lru_cache(maxsize=None)
+def test_label_ids_to_map_params():
+    """
+    Params for test_label_ids_to_map.
+    """
+    return [[(-4, -4, "d"), (10, 2, "a"), (15, 1, "b"), (123, 1, "c")]]
+
+
+@lru_cache(maxsize=None)
+def test_preprocess_analysis_points_params():
+    """
+    Params for preprocess_analysis_points.
+    """
+    filter_radius = 5.0, 51.0
+    relative_coverage_threshold = 0.11
+    params = []
+    for gdf in point_analysis_gdf():
+        circle_names_with_diameter = {str(key): 50.0 for key in gdf["name"].values}
+        params.append(
+            (
+                gdf,
+                circle_names_with_diameter,
+                filter_radius,
+                relative_coverage_threshold,
+            )
+        )
+
+    return params
