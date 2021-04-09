@@ -2,18 +2,20 @@
 Plotting utilities.
 """
 import warnings
-import fractopo_subsampling.utils as utils
 from itertools import count
+from typing import Dict, Sequence, Tuple
+
 import geopandas as gpd
-import pandas as pd
-from pandas.core.groupby import DataFrameGroupBy
-from matplotlib.figure import Figure
-import seaborn as sns
-import scipy.stats as stats
-import numpy as np
-from typing import Tuple, Sequence, Dict
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import scipy.stats as stats
+import seaborn as sns
 from matplotlib.cbook import boxplot_stats
+from matplotlib.figure import Figure
+from pandas.core.groupby import DataFrameGroupBy
+
+import fractopo_subsampling.utils as utils
 
 dist_continous = [
     d for d in dir(stats) if isinstance(getattr(stats, d), stats.rv_continuous)

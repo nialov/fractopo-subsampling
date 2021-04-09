@@ -4,7 +4,7 @@ General utilities for subsampling.
 import random
 from itertools import compress, count
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, Union, Any
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import geopandas as gpd
 import numpy as np

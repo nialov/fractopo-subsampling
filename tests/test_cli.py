@@ -142,7 +142,7 @@ def test_sim(
         if len(arg) > 0
     ]
     result = runner.invoke(
-        cli.sim,
+        cli.subsample,
         args=args,
     )
     if not result.exit_code == 0:
@@ -154,7 +154,7 @@ def test_sim(
 
     if len(hashname) == 0:
         assert Path(results_path_str).exists()
-        df = fn.read_csv(Path(results_path_str))
+        df = network_scripts.read_csv(Path(results_path_str))
         assert isinstance(df, pd.DataFrame)
         schema.describe_df_schema.validate(df)
     else:
@@ -163,7 +163,7 @@ def test_sim(
             for path in globbed:
                 path.unlink()
             assert False
-        df = fn.read_csv(globbed[0])
+        df = network_scripts.read_csv(globbed[0])
         globbed[0].unlink()
         assert isinstance(df, pd.DataFrame)
         assert not df.empty

@@ -102,7 +102,7 @@ def baseanalyze(
 @click.argument("coverage_path_str", type=click.Path(exists=True, dir_okay=False))
 @click.option("how_many", "--how-many", type=click.IntRange(1, 100), default=1)
 @click.option("hashname", "--hashname", is_flag=True, default=False)
-def subsampled(
+def subsample(
     traces_path_str: str,
     area_path_str: str,
     results_path_str: str,
