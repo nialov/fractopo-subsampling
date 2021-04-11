@@ -91,9 +91,6 @@ def test_sim_params():
             f"{tempfile.mktemp()}",
             f"{tempfile.mkdtemp()}",
             flato_area_path_str,
-            "--how-many",
-            "1",
-            "",
         ),
         (
             flato_traces_path_str,
@@ -101,9 +98,6 @@ def test_sim_params():
             f"{tempfile.mktemp()}",
             f"{tempfile.mkdtemp()}",
             flato_area_path_str,
-            "--how-many",
-            "2",
-            "",
         ),
         (
             flato_traces_path_str,
@@ -111,9 +105,6 @@ def test_sim_params():
             f"{tempfile.mktemp(suffix='.csvtest')}",
             f"{tempfile.mkdtemp()}",
             flato_area_path_str,
-            "--how-many",
-            "1",
-            "--hashname",
         ),
     ]
 

@@ -4,7 +4,12 @@ General utilities for subsampling.
 import random
 from itertools import compress, count
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+import logging
+from subprocess import check_call
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, Literal, Callable
+import csv
+from enum import Enum, unique
 
 import geopandas as gpd
 import numpy as np
@@ -53,6 +58,21 @@ class Utils:
         "branch power_law exponent",
         "Fracture Intensity P21",
     }
+
+
+@unique
+class Skip(Enum):
+
+    """
+    Enums for skip options.
+    """
+
+    valid = "valid"
+    invalid = "invalid"
+    empty = "empty"
+
+
+SCRIPTS_RUN_CMD = "python3 -m fractopo_subsampling"
 
 
 def param_renamer(param: str):
@@ -304,6 +324,7 @@ def cached_subsampling(
     dataframe_grouped: DataFrameGroupBy,
     iterations: int,
     savepath: Path,
+    circle_names_with_diameter: Dict[str, int],
     subsample_area_limits: Optional[Tuple[float, float]] = None,
 ):
     """
@@ -317,7 +338,7 @@ def cached_subsampling(
                 aggregate_chosen(
                     random_sample_of_circles(
                         dataframe_grouped,
-                        Utils.circle_names_with_diameter,
+                        circle_names_with_diameter,
                         min_area=subsample_area_limits[0],
                         max_area=subsample_area_limits[1],
                     ),
@@ -327,5 +348,74 @@ def cached_subsampling(
             ]
         )
         agg_df.to_csv(savepath, index=False)
-
     return agg_df
+
+
+def collect_paths(
+    csv_path: str,
+    skip: List[Literal[Skip.empty, Skip.valid, Skip.invalid]],
+    filter: str = "",
+) -> Tuple[List[Path], List[Path], List[Tuple[str, str, float]]]:
+    """
+    Collect trace and area paths from relations.csv file.
+    """
+    if not all([val in Skip for val in skip]):
+        raise ValueError(f"Expected skip vals to be one of {Skip}.")
+    traces_paths, area_paths, marks = [], [], []
+    with Path(csv_path).open("r") as csvfile:
+        reader = csv.reader(csvfile)
+        for idx, row in enumerate(reader):
+            if idx == 0:
+                continue
+            base_path = "{}/{}/{}/{}"
+            area_path = Path(
+                base_path.format(row[2], "areas", row[3], row[0] + ".gpkg")
+            ).resolve()
+            traces_path = Path(
+                base_path.format(row[2], "traces", row[3], row[1] + ".gpkg")
+            ).resolve()
+            if not (area_path.exists() and traces_path.exists()):
+                continue
+            if row[4] == "True" and Skip.valid in skip:
+                # Do not collect valid.
+                continue
+            if row[4] == "False" and Skip.invalid in skip:
+                # Do not collect invalid.
+                continue
+            if row[5] == "True" and Skip.empty in skip:
+                # Do not collect empty.
+                continue
+            if len(filter) > 0 and filter not in area_path.stem:
+                # Only collect area paths that fit filter.
+                continue
+
+            traces_paths.append(traces_path)
+            area_paths.append(area_path)
+            # valid, empty, radius
+            diameter = float(row[-1])
+            marks.append((row[4], row[5], diameter))
+    return traces_paths, area_paths, marks
+
+
+def async_run(all_args: List[Sequence[str]]):
+    """
+    Run command line tasks in parallel.
+    """
+    # If max_workers is None, the amount will be equal to the amount of
+    # processors.
+    with ProcessPoolExecutor(max_workers=None) as executor:
+
+        # Submit tasks, collect futures
+        futures = [executor.submit(check_call, args) for args in all_args]
+
+        results = []
+
+        # Collect results as they complete
+        for result in as_completed(futures):
+
+            try:
+                results.append(result.result())
+            except Exception as err:
+
+                # Log exceptions to stder (shouldnt occur)
+                logging.error(err)

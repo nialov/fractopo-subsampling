@@ -3,10 +3,12 @@ Command line interface of subsampling scripts.
 """
 import logging
 from pathlib import Path
+from typing import Sequence, List
 
 import click
 from fractopo.analysis.random_sampling import NetworkRandomSampler
 from fractopo.general import read_geofile
+import fractopo_subsampling.utils as utils
 
 from fractopo_subsampling.network_scripts import (
     analyze,
@@ -100,28 +102,29 @@ def baseanalyze(
 @click.argument("results_path_str", type=click.Path(dir_okay=False))
 @click.argument("other_results_path_str", type=click.Path(exists=True, dir_okay=True))
 @click.argument("coverage_path_str", type=click.Path(exists=True, dir_okay=False))
-@click.option("how_many", "--how-many", type=click.IntRange(1, 100), default=1)
-@click.option("hashname", "--hashname", is_flag=True, default=False)
 def subsample(
     traces_path_str: str,
     area_path_str: str,
     results_path_str: str,
     other_results_path_str: str,
     coverage_path_str: str,
-    how_many: int,
-    hashname: bool,
 ):
     """
     Conduct single network subsampling within the given sample area.
     """
+    # Convert to Paths
     traces_path = Path(traces_path_str)
     area_path = Path(area_path_str)
     other_results_path = Path(other_results_path_str)
     results_path = Path(results_path_str)
     coverage_path = Path(coverage_path_str)
+
+    # Read GeoDataFrames
     trace_gdf = read_geofile(traces_path)
     area_gdf = read_geofile(area_path)
     coverage_gdf = read_geofile(coverage_path)
+
+    # Initialize NetworkRandomSampler
     sampler = NetworkRandomSampler(
         trace_gdf=trace_gdf,
         area_gdf=area_gdf,
@@ -130,45 +133,58 @@ def subsample(
         random_choice="radius",
     )
 
-    for _ in range(how_many):
+    # Create random network sample
+    # Returns fractopo Network instance, centroid shapely Point and
+    # radius of the sample circle
+    network, target_centroid, radius = sampler.random_network_sample()
 
-        network, target_centroid, radius = sampler.random_network_sample()
-        amount_of_coverage = assess_coverage(target_centroid, radius, coverage_gdf)
-        if hashname:
-            name_hash = abs(hash(target_centroid.wkt))
-            results_path = (
-                results_path.parent / f"{results_path.stem}_{name_hash}"
-                f"{results_path.suffix}"
-            )
-            if results_path.exists():
-                more_complex_hash = abs(hash(target_centroid.wkt) + hash(radius))
-                results_path = (
-                    results_path.parent / f"{results_path.stem}_{more_complex_hash}"
-                    f"{results_path.suffix}"
-                )
-                assert not results_path.exists()
+    # Assess the amount of censoring within the sample
+    amount_of_coverage = assess_coverage(target_centroid, radius, coverage_gdf)
 
-        describe_df = describe_random_network(
-            network=network,
-            target_centroid=target_centroid,
-            radius=radius,
-            name=area_path.stem,
-            amount_of_coverage=amount_of_coverage,
+    # Use the sample centroid Point and hash its wkt string repr
+    name_hash = abs(hash(target_centroid.wkt))
+
+    # Resolve path
+    save_path = (
+        results_path.parent / f"{results_path.stem}_{name_hash}"
+        f"{results_path.suffix}"
+    )
+
+    # If there's hash conflict, make more complex hash
+    if results_path.exists():
+        more_complex_hash = abs(hash(target_centroid.wkt) + hash(radius))
+        save_path = (
+            results_path.parent / f"{results_path.stem}_{more_complex_hash}"
+            f"{results_path.suffix}"
         )
+        assert not save_path.exists()
 
-        save_describe_df(describe_df, results_path=results_path)
-        if network is not None:
-            save_azimuth_bin_data(
-                network,
-                other_results_path,
-                loc_hash=f"{area_path.stem}_{target_centroid.wkt}_{radius}",
-            )
+    # Resolve the Network instance to just a dataframe of the parameters
+    # we are interested in
+    describe_df = describe_random_network(
+        network=network,
+        target_centroid=target_centroid,
+        radius=radius,
+        name=area_path.stem,
+        amount_of_coverage=amount_of_coverage,
+    )
+
+    # Save the dataframe
+    save_describe_df(describe_df, results_path=save_path)
+
+    # Save azimuth rose plots
+    if network is not None:
+        save_azimuth_bin_data(
+            network,
+            other_results_path,
+            loc_hash=f"{area_path.stem}_{target_centroid.wkt}_{radius}",
+        )
 
 
 @main.command()
 @click.argument("results_path_str", type=click.Path(exists=True, dir_okay=True))
 @click.argument("gather_path_str", type=click.Path(dir_okay=False))
-def gather_subsampling(results_path_str: str, gather_path_str: str):
+def gather_subsamples(results_path_str: str, gather_path_str: str):
     """
     Gather subsampling results.
     """
@@ -178,3 +194,89 @@ def gather_subsampling(results_path_str: str, gather_path_str: str):
     save_csv(concatted, gather_path)
     concatted.to_pickle(gather_path.with_suffix(".pickle"))
     print(f"Saved concatted data at {gather_path}.")
+
+
+@main.command()
+@click.option(
+    "csv_name",
+    "--csv-name",
+    type=click.Path(exists=True, dir_okay=False),
+    required=True,
+)
+@click.option(
+    "censoring_geopackage",
+    "--censoring-geopackage",
+    type=click.Path(exists=True, dir_okay=False),
+    required=True,
+)
+@click.option(
+    "results_dir",
+    "--results-dir",
+    type=click.Path(exists=True, dir_okay=True),
+    required=True,
+)
+@click.option(
+    "azimuth_results_dir",
+    "--azimuth-results-dir",
+    type=click.Path(exists=True, dir_okay=True),
+    required=True,
+)
+@click.option(
+    "how_many",
+    "--how-many",
+    type=click.IntRange(min=1, max=10000),
+    required=True,
+)
+@click.option(
+    "filter_pattern", "--filter-pattern", type=click.STRING, default="", required=False
+)
+def network_subsampling(
+    csv_name: str,
+    censoring_geopackage: str,
+    results_dir: str,
+    azimuth_results_dir: str,
+    filter_pattern: str,
+    how_many: int,
+):
+    """
+    Run network subsampling on all valid areas in parallel.
+
+    Calls subsample cli command in parallel.
+    """
+    # Resolve paths
+    traces_paths, area_paths, marks = utils.collect_paths(
+        csv_name, skip=[utils.Skip.invalid, utils.Skip.empty], filter=filter_pattern
+    )
+
+    # Collect a list of command sequences
+    cmds: List[Sequence[str]] = []
+
+    # Iterate over each path
+    for trace_path, area_path, _ in zip(traces_paths, area_paths, marks):
+
+        # Resolve results path
+        results_path = Path(results_dir) / f"{area_path.stem}.csv"
+
+        # Resolve path for misc results
+        other_results_path = Path(azimuth_results_dir)
+
+        # Create command tuple
+        cmd_raw = (
+            *utils.SCRIPTS_RUN_CMD.split(" "),
+            "subsample",
+            trace_path,
+            area_path,
+            results_path,
+            other_results_path,
+            censoring_geopackage,
+        )
+
+        # Convert all tuple values to string and save to list
+        cmd_str = list(map(str, cmd_raw))
+
+        # Add command sequence to list how_many times
+        for _ in range(how_many):
+            cmds.append(cmd_str)
+
+    # Run all command sequences in parallel
+    utils.async_run(cmds)

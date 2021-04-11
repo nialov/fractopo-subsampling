@@ -106,9 +106,6 @@ def test_baseanalyze_with_gather(
             "results_path_str",
             "other_results_path_str",
             "coverage_path_str",
-            "how_many",
-            "how_many_count",
-            "hashname",
         ]
     ),
     tests.test_sim_params(),
@@ -119,9 +116,6 @@ def test_sim(
     results_path_str,
     other_results_path_str,
     coverage_path_str,
-    how_many,
-    how_many_count,
-    hashname,
 ):
     """
     Test sim click entrypoint.
@@ -135,9 +129,6 @@ def test_sim(
             results_path_str,
             other_results_path_str,
             coverage_path_str,
-            how_many,
-            how_many_count,
-            hashname,
         ]
         if len(arg) > 0
     ]
@@ -152,19 +143,10 @@ def test_sim(
         traceback.print_tb(tb)
         assert False
 
-    if len(hashname) == 0:
-        assert Path(results_path_str).exists()
-        df = network_scripts.read_csv(Path(results_path_str))
-        assert isinstance(df, pd.DataFrame)
-        schema.describe_df_schema.validate(df)
-    else:
-        globbed = list(Path(results_path_str).parent.glob("*.csvtest"))
-        if not len(globbed) == 1:
-            for path in globbed:
-                path.unlink()
-            assert False
-        df = network_scripts.read_csv(globbed[0])
-        globbed[0].unlink()
+    globbed = list(Path(results_path_str).parent.glob("*.csvtest"))
+    for result in globbed:
+        df = network_scripts.read_csv(result)
+        result.unlink()
         assert isinstance(df, pd.DataFrame)
         assert not df.empty
         schema.describe_df_schema.validate(df)
