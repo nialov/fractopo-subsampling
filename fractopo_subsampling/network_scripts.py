@@ -4,7 +4,7 @@ Fractopo Network sampling scripts.
 import logging
 from pathlib import Path
 from shutil import move
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import geopandas as gpd
 import numpy as np
@@ -69,9 +69,11 @@ def gather_subsampling_results(results_path: Path) -> pd.DataFrame:
     if not (results_path.exists() and results_path.is_dir()):
         raise NotADirectoryError(f"Expected {results_path} dir to exist.")
 
-    dfs = []
-    for path in results_path.glob("*.csv"):
-        df = read_csv(path)
+    dfs: List[pd.DataFrame] = []
+    for path in results_path.glob("*.pickle"):
+        df = pd.read_pickle(path)
+        assert isinstance(df, pd.DataFrame)
+        # df = read_csv(path)
         dfs.append(df)
 
     assert all([isinstance(val, pd.DataFrame) for val in dfs])
