@@ -4,6 +4,8 @@ Invoke tasks.
 Most tasks employ nox to create a virtual session for testing.
 """
 from invoke import UnexpectedExit, task
+from shutil import copytree, rmtree
+from pathlib import Path
 
 nox_parallel_sessions = (
     "tests_pipenv",
@@ -35,6 +37,28 @@ def lint(c):
     Lint everything.
     """
     c.run("nox --session lint")
+
+
+@task
+def sync_notebooks(_):
+    """
+    Sync notebooks from local development directory.
+    """
+    local_dev_notebooks_dir = Path("/mnt/d/Data/trace_repo/notebooks")
+
+    notebooks_dir = Path("scripts_and_notebooks/notebooks")
+
+    if not (local_dev_notebooks_dir.exists() and local_dev_notebooks_dir.is_dir()):
+        print(f"No local dev dir found at {local_dev_notebooks_dir}.")
+        return
+
+    if notebooks_dir.exists():
+
+        print(f"Removing {notebooks_dir}.")
+        rmtree(notebooks_dir)
+
+    print(f"Copying directory tree from {local_dev_notebooks_dir} to {notebooks_dir}.")
+    copytree(local_dev_notebooks_dir, notebooks_dir)
 
 
 @task(pre=[requirements])
