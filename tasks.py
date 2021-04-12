@@ -3,9 +3,10 @@ Invoke tasks.
 
 Most tasks employ nox to create a virtual session for testing.
 """
-from invoke import UnexpectedExit, task
-from shutil import copytree, rmtree
 from pathlib import Path
+from shutil import copytree, rmtree
+
+from invoke import UnexpectedExit, task
 
 nox_parallel_sessions = (
     "tests_pipenv",
@@ -21,22 +22,6 @@ def requirements(c):
     Sync requirements from Pipfile to setup.py.
     """
     c.run("nox --session requirements")
-
-
-@task
-def format(c):
-    """
-    Format everything.
-    """
-    c.run("nox --session format")
-
-
-@task(pre=[format])
-def lint(c):
-    """
-    Lint everything.
-    """
-    c.run("nox --session lint")
 
 
 @task
@@ -59,6 +44,22 @@ def sync_notebooks(_):
 
     print(f"Copying directory tree from {local_dev_notebooks_dir} to {notebooks_dir}.")
     copytree(local_dev_notebooks_dir, notebooks_dir)
+
+
+@task(pre=[sync_notebooks])
+def format(c):
+    """
+    Format everything.
+    """
+    c.run("nox --session format")
+
+
+@task(pre=[format])
+def lint(c):
+    """
+    Lint everything.
+    """
+    c.run("nox --session lint")
 
 
 @task(pre=[requirements])
@@ -89,7 +90,7 @@ def nox_parallel(c):
     print(f"{len(results)} nox sessions ran succesfully.")
 
 
-@task(pre=[requirements])
+@task(pre=[sync_notebooks, requirements])
 def ci_test(c):
     """
     Test suite for continous integration testing.
@@ -117,7 +118,7 @@ def docs(c):
     c.run("nox --session docs")
 
 
-@task(pre=[requirements, test, lint, docs])
+@task(pre=[sync_notebooks, requirements, test, lint, docs])
 def make(_):
     """
     Make all.
