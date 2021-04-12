@@ -3,13 +3,13 @@ Command line interface of subsampling scripts.
 """
 import logging
 from pathlib import Path
-from typing import Sequence, List
+from typing import List, Sequence
 
 import click
 from fractopo.analysis.random_sampling import NetworkRandomSampler
 from fractopo.general import read_geofile
-import fractopo_subsampling.utils as utils
 
+import fractopo_subsampling.utils as utils
 from fractopo_subsampling.network_scripts import (
     analyze,
     assess_coverage,

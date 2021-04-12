@@ -19,7 +19,7 @@ Note! Only for Linux-based systems.
 
        .. code:: bash
 
-          kaggle datasets download -d nasurz/getaberget-fracture-trace-dataset
+          kaggle datasets download nasurz/getaberget-fracture-trace-dataset
 
     -  Either way you will have downloaded a zip file with the dataset.
 
@@ -70,7 +70,7 @@ Note! Only for Linux-based systems.
        ``invoke`` tasks in ``tasks.py``.
 
     -  All invoke tasks can be displayed with ``invoke --list`` command.
-       ``invoke`` should be installed in the Python environment.
+       ``invoke`` should already be installed in the Python environment.
 
           .. code:: bash
 
@@ -80,6 +80,9 @@ Note! Only for Linux-based systems.
              # using pipenv
              pipenv run invoke --list
 
+             # using poetry
+             poetry run invoke --list
+
      -  The ``invoke`` tasks will do characterization and subsampling
         from all target areas (all rows) that are in ``relations.csv``.
 
@@ -87,7 +90,7 @@ Note! Only for Linux-based systems.
         characterization, skip to the next step.
 
 10. Most of the analysis is visualized in the notebooks in the notebooks
-    directory. The virtual environment should have ``jupyter lab``
+    directory. The virtual environment should already have ``jupyter lab``
     installed.
 
    .. code:: bash
@@ -99,7 +102,7 @@ Note! Only for Linux-based systems.
       subsampling results as csvs from kaggle as well.
 
    -  Or alternatively repeat the subsampling or base circle characterization
-      that is introduced in the previous step.
+      that is introduced in the previous step to get unique subsamples.
 
    -  Configure notebook analysis in ``notebooks/subsampling_config.py``
       and within the notebooks themselves.

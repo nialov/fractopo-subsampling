@@ -1,15 +1,15 @@
 """
 General utilities for subsampling.
 """
+import csv
+import logging
 import random
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from enum import Enum, unique
 from itertools import compress, count
 from pathlib import Path
-import logging
 from subprocess import check_call
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, Literal, Callable
-import csv
-from enum import Enum, unique
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
