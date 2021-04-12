@@ -4,7 +4,7 @@ Fractopo Network sampling scripts.
 import logging
 from pathlib import Path
 from shutil import move
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
