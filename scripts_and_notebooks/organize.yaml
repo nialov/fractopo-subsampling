@@ -1,0 +1,38 @@
+# Now can read a csv file for thematic and scale categories
+
+rules:
+  # move traces to traces/ and areas to areas/
+  - folders:
+      - ./unorganized/
+    filters:
+      - extension: gpkg
+      - filename:
+          endswith:
+            - _traces
+            - _area
+      - python: |
+          import csv
+          with (path.parent.parent / "relations.csv").open("r") as csvfile:
+              reader = csv.reader(csvfile)
+              for idx, row in enumerate(reader):
+                  if idx == 0:
+                      continue
+                  thematic = None
+                  scale = None
+                  is_traces = path.stem.endswith("traces")
+                  ends = "traces" if is_traces else "areas"
+                  if path.stem.startswith(row[1] if is_traces else row[0]):
+                      thematic = row[2]
+                      scale = row[3]
+                      break
+          if any([val is None for val in (thematic, scale)]):
+              raise ValueError(f"No data for {path.stem} in csv.")
+          return {
+              "thematic": thematic,
+              "ends": ends,
+              "scale": scale,
+              }
+    actions:
+      - move:
+          dest: "./{python.thematic}/{python.ends}/{python.scale}/"
+          overwrite: true
