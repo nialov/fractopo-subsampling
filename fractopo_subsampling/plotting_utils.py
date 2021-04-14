@@ -294,7 +294,7 @@ def plot_group_pair_boxplots(
             # Only plot outlier proportion of it fits criteria
             if (
                 proportion_of_fliers > outlier_proportion_threshold
-                and data.shape[0] > 10
+                and data.shape[0] > 100
             ):
 
                 # Plot outlier proportion as text
@@ -326,10 +326,12 @@ def plot_group_pair_boxplots(
     if i < 3:
         ax.tick_params(axis="x", bottom=False, labelbottom=False)
         ax.set_xlabel("")
+
     # first row
     if i == 0:
-        ax.set_title(next(cc_gen))
-    # second and third col
+        ax.set_title(next(cc_gen), fontsize="medium")
+
+    # second or later col
     if j > 0:
         ax.set_ylabel("")
 
@@ -347,12 +349,12 @@ def grouped_boxplots(
     outlier_proportion_threshold: float = 1.0,
 ):
     """
-    Plot grouped boxplots.
+    Plot group-pair boxplots.
     """
     # Initialize figure and axes
     fig: Figure
     fig, axes = plt.subplots(
-        4, len(group_first_labels), figsize=utils.paper_figsize(0.8), sharey="row"
+        4, len(group_first_labels), figsize=utils.paper_figsize(0.85), sharey="row"
     )
 
     # Set figure title
