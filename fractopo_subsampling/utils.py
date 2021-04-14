@@ -32,10 +32,10 @@ class Utils:
 
     params_with_func = {
         # "Fracture Intensity (Mauldon)": "mean",
+        "Fracture Intensity P21": "mean",
         "Connections per Branch": "mean",
         "trace power_law exponent": "mean",
         "branch power_law exponent": "mean",
-        "Fracture Intensity P21": "mean",
         "Number of Traces": "sum",
         "Number of Branches": "sum",
         "radius": "sum",
