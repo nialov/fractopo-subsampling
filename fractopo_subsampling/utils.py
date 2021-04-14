@@ -419,3 +419,13 @@ def async_run(all_args: List[Sequence[str]]):
 
                 # Log exceptions to stder (shouldnt occur)
                 logging.error(err)
+
+
+def only_half_radius(
+    subsampled_radius: float, full_diameter: float, radius_constraint: float
+):
+    """
+    Check if radius is smaller than fraction of full radius.
+    """
+    assert 0.0 <= radius_constraint <= 1.0
+    return subsampled_radius <= ((full_diameter / 2) * radius_constraint)
