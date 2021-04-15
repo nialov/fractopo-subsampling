@@ -191,12 +191,20 @@ def best_fit_dist(data, list_of_dists=dist_continous):
     return fig, axes
 
 
-def plot_cc_area_bin_pairs(cc, area, agg_df, reference_value_dict, param):
+def plot_cc_area_bin_pairs(
+    cc: str,
+    area: str,
+    agg_df: pd.DataFrame,
+    reference_value_dict: Dict[str, float],
+    param: str,
+    area_bin_col: str,
+    circle_count_col: str,
+):
     """
     Plot circle count area bin pair statistical distribution.
     """
     pair_df = agg_df.loc[agg_df["circle_count_binned"] == cc].loc[
-        (agg_df["area_binned"] == area)
+        (agg_df[area_bin_col] == area)
     ]
     if pair_df.shape[0] < 100:
         return
@@ -312,7 +320,7 @@ def plot_group_pair_boxplots(
     ax.set_ylabel(utils.param_renamer(param))
 
     # Set x label
-    ax.set_xlabel(r"Total Area ($\times 10^3\ m^2$)")
+    ax.set_xlabel(r"Total Area ($10^3\ m^2$)")
 
     # Set reference value line
     ax.axhline(
@@ -551,13 +559,15 @@ def plot_distribution(
     reference_value_dict: Dict[str, float],
     ax,
     legend: bool,
+    area_bin_col: str,
+    circle_count_col: str,
 ):
     """
     Plot beta distribution of circle count and total area grouped for param.
     """
     # Locate values with certain circle count and total area group
-    pair_df = agg_df.loc[agg_df["circle_count_binned"] == circle_group].loc[
-        (agg_df["area_binned"] == area_group)
+    pair_df = agg_df.loc[agg_df[circle_count_col] == circle_group].loc[
+        (agg_df[area_bin_col] == area_group)
     ]
 
     # Get parameter values
