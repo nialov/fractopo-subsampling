@@ -253,7 +253,7 @@ def plot_group_pair_boxplots(
     Plot boxplots for group pair.
     """
     # Generate next ax
-    ax = next(ax_gen)
+    ax: Axes = next(ax_gen)
 
     # Plot seaborn boxplot on ax
     ax = sns.boxplot(
@@ -342,6 +342,9 @@ def plot_group_pair_boxplots(
     # second or later col
     if j > 0:
         ax.set_ylabel("")
+
+    # if i == 3:
+    #     ax.tick_params(labelsize="xx-small")
 
     return ax
 
