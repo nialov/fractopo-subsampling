@@ -101,11 +101,11 @@ and reference value plotting:
 
    invoke network-all --overwrite --points
 
-To conduct stage 1 subsampling for 25 times for each base circle:
+To conduct stage 1 subsampling for 5 times for each base circle:
 
 .. code:: bash
 
-   invoke network-subsampling --how-many 25
+   invoke network-subsampling --how-many 5
 
 To collect results of stage 1 subsampling (do after stage 1
 subsampling):

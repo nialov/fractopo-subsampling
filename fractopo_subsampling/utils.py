@@ -347,6 +347,7 @@ def cached_subsampling(
                 for _ in range(iterations)
             ]
         )
+        savepath.parent.mkdir(parents=True, exist_ok=True)
         agg_df.to_csv(savepath, index=False)
     return agg_df
 
