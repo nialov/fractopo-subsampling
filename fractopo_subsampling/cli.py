@@ -17,7 +17,6 @@ from fractopo_subsampling.network_scripts import (
     gather_results,
     gather_subsampling_results,
     save_azimuth_bin_data,
-    save_csv,
     save_describe_df,
     save_results,
 )
@@ -191,7 +190,7 @@ def gather_subsamples(results_path_str: str, gather_path_str: str):
     results_path = Path(results_path_str)
     gather_path = Path(gather_path_str)
     concatted = gather_subsampling_results(results_path=results_path)
-    save_csv(concatted, gather_path)
+    utils.save_csv(concatted, gather_path)
     concatted.to_pickle(gather_path.with_suffix(".pickle"))
     print(f"Saved concatted data at {gather_path}.")
 

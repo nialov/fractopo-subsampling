@@ -17,25 +17,10 @@ from pandera import DataFrameSchema
 from shapely.geometry import Point
 from shapely.wkt import loads
 
+import fractopo_subsampling.utils as utils
 from fractopo_subsampling.schema import describe_df_schema
 
 GEOM_COL = "geometry"
-
-
-def read_csv(path: Path) -> pd.DataFrame:
-    """
-    Read csv file with ; separator.
-    """
-    df = pd.read_csv(path, sep=";", index_col=[0])
-    assert isinstance(df, pd.DataFrame)
-    return df
-
-
-def save_csv(df: pd.DataFrame, path: Path) -> None:
-    """
-    Save csv file with ; separator.
-    """
-    df.to_csv(path, sep=";")
 
 
 def save_results(gdf: gpd.GeoDataFrame, save_path: Path):
@@ -73,7 +58,6 @@ def gather_subsampling_results(results_path: Path) -> pd.DataFrame:
     for path in results_path.glob("*.pickle"):
         df = pd.read_pickle(path)
         assert isinstance(df, pd.DataFrame)
-        # df = read_csv(path)
         dfs.append(df)
 
     assert all([isinstance(val, pd.DataFrame) for val in dfs])
@@ -89,8 +73,8 @@ def save_azimuth_bin_data(network: Network, other_results_path: Path, loc_hash: 
     trace_bins, _, _ = network.plot_trace_azimuth()
     branch_bins, _, _ = network.plot_branch_azimuth()
     trace_bin_df, branch_bin_df = bins_to_dataframes(trace_bins, branch_bins)
-    save_csv(trace_bin_df, other_results_path / f"trace_{loc_hash}.csv")
-    save_csv(branch_bin_df, other_results_path / f"branch_{loc_hash}.csv")
+    utils.save_csv(trace_bin_df, other_results_path / f"trace_{loc_hash}.csv")
+    utils.save_csv(branch_bin_df, other_results_path / f"branch_{loc_hash}.csv")
 
 
 def assess_coverage(
@@ -171,13 +155,13 @@ def save_numerical_data(
     )
 
     if results_path.exists():
-        df = read_csv(results_path)
+        df = utils.read_csv(results_path)
         assert isinstance(df, pd.DataFrame)
         concatted = pd.concat([df, curr_df])
     else:
         concatted = curr_df
 
-    save_csv(concatted, results_path)
+    utils.save_csv(concatted, results_path)
     concatted.to_pickle(results_path.with_suffix(".pickle"))
 
 
@@ -437,12 +421,12 @@ def save_describe_df(describe_df: pd.DataFrame, results_path: Path):
     Save description DataFrame.
     """
     if results_path.exists():
-        df = read_csv(results_path)
+        df = utils.read_csv(results_path)
         assert isinstance(df, pd.DataFrame)
         concatted = pd.concat([df, describe_df])
     else:
         concatted = describe_df
     assert not concatted.empty
 
-    save_csv(concatted, results_path)
+    utils.save_csv(concatted, results_path)
     concatted.to_pickle(results_path.with_suffix(".pickle"))
