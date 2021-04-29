@@ -331,7 +331,7 @@ def cached_subsampling(
     Perform subsampling.
     """
     if savepath.exists():
-        agg_df = read_csv(savepath)
+        agg_df = read_csv(savepath, index_col=[0])
     else:
         agg_df = pd.DataFrame(
             [
@@ -349,7 +349,7 @@ def cached_subsampling(
         )
         savepath.parent.mkdir(parents=True, exist_ok=True)
 
-        save_csv(agg_df, savepath)
+        save_csv(agg_df, savepath, index=True)
 
     return agg_df
 
@@ -434,11 +434,11 @@ def only_half_radius(
     return subsampled_radius <= ((full_diameter / 2) * radius_constraint)
 
 
-def read_csv(path: Path) -> pd.DataFrame:
+def read_csv(path: Path, index_col=[0]) -> pd.DataFrame:
     """
     Read csv file with , separator.
     """
-    df = pd.read_csv(path, sep=",", index_col=[0])
+    df = pd.read_csv(path, sep=",", index_col=index_col)
     assert isinstance(df, pd.DataFrame)
     return df
 
