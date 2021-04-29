@@ -3,7 +3,7 @@ Documentation
 
 Though this is somewhat structured like a Python package this more so
 a collection of scripts and utilities to conduct fracture network
-subsampling.
+subsampling and recreate the environment.
 
 See `SUBSAMPLING_README.rst <SUBSAMPLING_README.rst>`__ for guide on how
 to conduct subsampling.

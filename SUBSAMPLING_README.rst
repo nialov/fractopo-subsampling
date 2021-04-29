@@ -1,9 +1,33 @@
 How to recreate subsampling environment
 =======================================
 
-Note! Only for Linux-based systems.
+Note! Only for Linux-based systems with ``bash`` and Python 3.8 installed.
 
-1. Create working directory e.g. ~/projects/subsampling
+Automatic install
+-----------------
+
+Requires that ``kaggle``, ``git``, ``python3``, ``curl`` and
+``virtualenv`` cli commands are installed, configured
+(https://github.com/Kaggle/kaggle-api#api-credentials) and available on
+your system.
+
+1. Create working directory e.g. ``~/projects/subsampling``
+2. Run the full install script from ``fractopo-subsampling`` repository
+   with the following command:
+
+.. code:: bash
+
+   curl https://raw.githubusercontent.com/nialov/fractopo-subsampling/master/subsampling_full_install.sh | bash
+
+3. Done! See steps 9. and later in the *Manual install* section for
+   information on how to run subsampling. You do not need to download
+   and move the data in manual step 12, all downloding has been done
+   automatically.
+
+Manual install
+--------------
+
+1. Create working directory e.g. ``~/projects/subsampling``
 
 2. Switch to the working directory.
 
@@ -25,7 +49,7 @@ Note! Only for Linux-based systems.
 
 5. Create a Python virtual environment.
 
-   -  You may use pip, pipenv or poetry.
+   -  You may use virtualenv, pipenv or poetry.
    -  Python must be 3.8.
 
 6. Activate the virtual environment.
@@ -114,9 +138,10 @@ subsampling):
 
 10. Most of the analysis and stage 2 subsampling is in the notebooks in
     the ``notebooks`` directory. The virtual environment should already
-    have ``jupyter lab`` installed. Run ``Base_Circle_Analysis_Figure_7.ipynb``
-    notebook first to create working csvs required by
-    ``Subsampling_Figures_8_9_and_10.ipynb`` notebook.
+    have ``jupyter lab`` installed. Run
+    ``Base_Circle_Analysis_Figure_7.ipynb`` notebook first to create
+    working csvs required by ``Subsampling_Figures_8_9_and_10.ipynb``
+    notebook.
 
     .. code:: bash
 
@@ -153,8 +178,8 @@ subsampling):
 
     -  The csv paths can be alternatively changed within the
        ``notebooks/Subsampling_Figures_8_9_and_10.ipynb`` notebook but
-       note that they are relative to the notebook (``..`` to go to
-       previous directory).
+       note that they are relative to the notebook (use ``..`` in paths
+       to go to previous directory).
 
 14. You should now be able to exactly replicate the subsampling results
-    and plots.
+    and plots using the notebooks.
