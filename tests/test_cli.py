@@ -9,8 +9,8 @@ import pytest
 from click.testing import CliRunner
 
 import fractopo_subsampling.cli as cli
-import fractopo_subsampling.network_scripts as network_scripts
 import fractopo_subsampling.schema as schema
+import fractopo_subsampling.utils as utils
 import tests
 
 
@@ -145,7 +145,7 @@ def test_sim(
 
     globbed = list(Path(results_path_str).parent.glob("*.csvtest"))
     for result in globbed:
-        df = network_scripts.read_csv(result)
+        df = utils.read_csv(result)
         result.unlink()
         assert isinstance(df, pd.DataFrame)
         assert not df.empty
