@@ -436,15 +436,15 @@ def only_half_radius(
 
 def read_csv(path: Path) -> pd.DataFrame:
     """
-    Read csv file with ; separator.
+    Read csv file with , separator.
     """
-    df = pd.read_csv(path, sep=";", index_col=[0])
+    df = pd.read_csv(path, sep=",", index_col=[0])
     assert isinstance(df, pd.DataFrame)
     return df
 
 
 def save_csv(df: pd.DataFrame, path: Path, **kwargs) -> None:
     """
-    Save csv file with ; separator.
+    Save csv file with , separator.
     """
-    df.to_csv(path, sep=";", **kwargs)
+    df.to_csv(path, sep=",", **kwargs)
