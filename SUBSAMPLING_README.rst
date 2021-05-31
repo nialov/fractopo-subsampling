@@ -115,21 +115,21 @@ Python environment.
 The ``invoke`` tasks will do characterization and subsampling from all
 target areas (all rows) that are in ``relations.csv``. To conduct
 network analysis of all base circles and store results in jupyter
-notebooks:
+notebooks for later inspection:
 
 .. code:: bash
 
    # Prepend invoke with pipenv run or poetry run if using them
    invoke network-all --overwrite --notebooks
 
-To store results in a single GeoPackage as points for spatial analysis
-and reference value plotting:
+To store characterization results in a single GeoPackage as points for
+spatial analysis and reference value plotting:
 
 .. code:: bash
 
    invoke network-all --overwrite --points
 
-To conduct stage 1 subsampling for 5 times for each base circle:
+To conduct stage 1 subsampling 5 times for each base circle:
 
 .. code:: bash
 
@@ -161,6 +161,9 @@ subsampling):
     -  Configure notebook analysis in
        ``notebooks/subsampling_config.py`` and within the notebooks
        themselves.
+    -  Notebook ``Base_Circle_Analysis_Figure_7.ipynb`` needs to be run
+       before ``Subsampling_Figures_8_9_and_10.ipynb`` to create base
+       circle reference value csv.
 
 11. If you wish to use the exact datasets of stage 1 and 2 subsampling
     that I used, continue to 12 to download them. Otherwise, we're done!
@@ -198,7 +201,11 @@ subsampling):
     and plots using the notebooks in ``notebooks`` directory.
 
     .. code:: bash
-    
+
        # To open jupyter lab for notebook viewing and execution
        # Prepend with pipenv run or poetry run if using them
        jupyter lab
+
+    -  Notebook ``Base_Circle_Analysis_Figure_7.ipynb`` needs to be run
+       before ``Subsampling_Figures_8_9_and_10.ipynb`` to create base
+       circle reference value csv.
