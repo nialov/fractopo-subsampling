@@ -1,7 +1,8 @@
 How to recreate subsampling environment
 =======================================
 
-Note! Only for Linux-based systems with ``bash`` and Python 3.8 installed.
+Note! Only for Linux-based systems with ``bash`` and Python 3.8
+installed.
 
 Automatic install
 -----------------
@@ -17,11 +18,14 @@ your system.
 
 .. code:: bash
 
+   # As a general advice when running external scripts such as this
+   # you should verify the script before executing by visiting the
+   # link after the `curl` command below.
    curl https://raw.githubusercontent.com/nialov/fractopo-subsampling/master/subsampling_full_install.sh | bash
 
 3. Done! See steps 9. and later in the *Manual install* section for
    information on how to run subsampling. You do not need to download
-   and move the data in manual step 12, all downloding has been done
+   and move the data in manual step 12, all downloading has been done
    automatically.
 
 Manual install
@@ -50,7 +54,7 @@ Manual install
 5. Create a Python virtual environment.
 
    -  You may use virtualenv, pipenv or poetry.
-   -  Python must be 3.8.
+   -  Python must be version 3.8.\*
 
 6. Activate the virtual environment.
 
@@ -88,8 +92,9 @@ Manual install
 
 9. The environment is ready.
 
-**If you do not wish to conduct subsampling or base circle
-characterization, skip to the next step (10.).**
+**If you do not wish to conduct new subsampling or base circle
+characterization, skip to step 11. to download and use the exact dataset
+used in the manuscript.**
 
 Subsampling and base circle characterization have been implemented as
 ``invoke`` tasks in ``tasks.py``. All invoke tasks can be displayed with
@@ -114,6 +119,7 @@ notebooks:
 
 .. code:: bash
 
+   # Prepend invoke with pipenv run or poetry run if using them
    invoke network-all --overwrite --notebooks
 
 To store results in a single GeoPackage as points for spatial analysis
@@ -138,10 +144,7 @@ subsampling):
 
 10. Most of the analysis and stage 2 subsampling is in the notebooks in
     the ``notebooks`` directory. The virtual environment should already
-    have ``jupyter lab`` installed. Run
-    ``Base_Circle_Analysis_Figure_7.ipynb`` notebook first to create
-    working csvs required by ``Subsampling_Figures_8_9_and_10.ipynb``
-    notebook.
+    have ``jupyter lab`` installed.
 
     .. code:: bash
 
@@ -150,10 +153,11 @@ subsampling):
        jupyter lab
 
     -  You can download the exact dataset I used with Step 1 and Step 2
-       subsampling results as csvs from kaggle as well.
+       subsampling results as csvs from kaggle as well in step 11 and
+       onwards.
     -  Or alternatively repeat the subsampling or base circle
        characterization that is introduced in the previous step to get
-       unique subsamples.
+       unique subsamples from the same base fracture dataset.
     -  Configure notebook analysis in
        ``notebooks/subsampling_config.py`` and within the notebooks
        themselves.
@@ -175,6 +179,15 @@ subsampling):
     ``results/Ahvenanmaa_analysis_points.gpkg``. Create the directories
     relative to the current working directory and put the csvs and
     GeoPackage in the default paths.
+
+    .. code:: bash
+
+       # Creating directories and moving the subsampling files
+       mkdir results/subsampling/cached_subsamples -p 
+       mkdir results/subsampling/collected -p 
+       mv stage_1_subsampling_results.csv results/subsampling/collected/
+       mv stage_2_aggregated_subsampling_results.csv results/subsampling/cached_subsamples/
+       mv Ahvenanmaa_analysis_points.gpkg results/
 
     -  The csv paths can be alternatively changed within the
        ``notebooks/Subsampling_Figures_8_9_and_10.ipynb`` notebook but
