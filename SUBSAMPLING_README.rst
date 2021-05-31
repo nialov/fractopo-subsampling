@@ -195,4 +195,10 @@ subsampling):
        to go to previous directory).
 
 14. You should now be able to exactly replicate the subsampling results
-    and plots using the notebooks.
+    and plots using the notebooks in ``notebooks`` directory.
+
+    .. code:: bash
+    
+       # To open jupyter lab for notebook viewing and execution
+       # Prepend with pipenv run or poetry run if using them
+       jupyter lab
