@@ -3,10 +3,10 @@ Documentation
 
 Though this is somewhat structured like a Python package this more so
 a collection of scripts and utilities to conduct fracture network
-subsampling and recreate the environment.
+subsampling and to recreate the environment.
 
 See `SUBSAMPLING_README.rst <SUBSAMPLING_README.rst>`__ for guide on how
-to conduct subsampling.
+to install and conduct subsampling as described in the manuscript.
 
 Running tests
 ~~~~~~~~~~~~~
@@ -22,6 +22,13 @@ To run full extensive test suite:
 .. code:: bash
 
    pipenv run invoke test
+
+To run continuous integrations tests locally suite:
+
+.. code:: bash
+
+   pipenv run invoke ci-test
+
 
 Building docs
 ~~~~~~~~~~~~~
