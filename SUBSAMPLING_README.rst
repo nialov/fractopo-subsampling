@@ -1,3 +1,19 @@
+Future plans and development
+============================
+
+The whole process of subsampling can be streamlined but there's many
+parts which are opionated and there's no single good way. There's
+multiple approaches to using subsamples of fracture data in
+understanding uncertainty. More than likely the approach implemented
+here is not interesting in all cases when working with fracture data.
+
+Subsampling could be partly implemented in ``fractopo`` to reduce the
+complexity of the install and execution. Notebooks could be replaced
+with module Python code but the notebooks do contain the most opionated
+parts of the subsampling and the implementation of how the subsamples
+are analyzed should be the most transparent part of the process
+as it is the most important. Notebooks also allow quick experimentation.
+
 How to recreate subsampling environment
 =======================================
 
@@ -209,3 +225,107 @@ subsampling):
     -  Notebook ``Base_Circle_Analysis_Figure_7.ipynb`` needs to be run
        before ``Subsampling_Figures_8_9_and_10.ipynb`` to create base
        circle reference value csv.
+
+Subsampling own data
+====================
+
+1. Proceed with automatic or manual installation as described in `How to
+   recreate subsampling
+   environment <#how-to-recreate-subsampling-environment>`__. You can
+   skip data downloading steps (12,13) in manual installation. You
+   should download the fracture trace data in steps 3 and 4 as you can
+   use the ready data as reference when replacing it with your own.
+
+2. Fracture traces must be linked to target areas which define the area
+   in which the traces are analyzed. This linking is done with the
+   ``relations.csv`` file which comes with the fracture trace data from
+   kaggle. Example contents:
+
+   .. code:: csv
+
+      area,traces,thematic,scale,valid,empty,diameter
+      Getaberget_20m_1_1_area,Getaberget_20m_1_traces,ahvenanmaa,20m,True,False,50
+      Getaberget_20m_1_2_area,Getaberget_20m_1_traces,ahvenanmaa,20m,True,False,40
+
+   -  The first row is the headers:
+
+      -  ``area`` refers to the ``GeoPackage`` file with target area
+         data i.e. a single polygon circle without the extension
+         ``.gpkg``.
+      -  ``traces`` refers to the ``GeoPackage`` file with trace data
+         without the extension ``.gpkg``. The trace dataset has no limit
+         on its extent, the analysis is always focused only based on the
+         target area.
+      -  ``thematic`` refers to the thematic name for a dataset. No
+         strict convention for naming.
+      -  ``scale`` refers to the scale of observation for the dataset.
+         E.g. ``20m`` refers to the drone flight elevation of 20 meters.
+         No strict convention for naming. All datasets that are
+         subsampled at the same time should be of the same scale.
+      -  ``valid`` refers to if the trace/area combo is valid for
+         further analysis. Validation is done with ``fractopo``
+         ``tracevalidate`` command line tool. You can run validation for
+         your datasets with task ``invoke validate-all``. This will
+         validate based on the field contents of ``valid``. Content must
+         be ``True`` or ``False``. Change it manually after you've
+         conducted validation and the traces pass.
+      -  ``empty`` is either ``True`` or ``False``. Refers to target
+         areas that are devoid of traces but there's really no reason to
+         have such areas except for as future work reminder.
+      -  ``diameter`` is the diameter of the target area circle.
+
+3. Files and directories:
+
+   -  Value in the ``thematic`` column is the name of the base directory
+      where the trace and area data is located. Within the trace and
+      area folders the data is in a folder referring to the ``scale``
+      column value. E.g.
+
+      .. code:: bash
+
+         ahvenanmaa/
+         ├── areas
+         │   └── 20m
+         │       ├── Flato_20m_1_area.gpkg
+         └── traces
+             └── 20m
+                 ├── Flato_20m_1_traces.gpkg
+
+   -  Either put your trace and target area GeoPackages directly as
+      they've been designated in ``relations.csv`` or put them in
+      ``unorganized`` folder and run ``invoke organize`` which will
+      organize the files automatically using ``relations.csv``.
+
+4. Next up we will perform the steps to get to subsampling your dataset.
+
+   .. code:: bash
+
+      # Conduct fractopo network analysis and save results in points
+      # into a GeoPackage
+      invoke network-all --points --overwrite
+
+      # Conduct subsampling to generate stage 1 dataset
+      # The number designated how many subsamples per target area are
+      # made
+      invoke network-subsampling --how-many 50
+
+   -  Configure stage 2 subsampling by editing
+      ``notebooks/subsampling_config.py`` file. E.g.
+      ``circle_names_with_diameter`` variable is the filter for choosing
+      which target areas are wanted in stage 2 subsampling.
+
+5. Subsampling is done in jupyter notebooks.
+
+   .. code:: bash
+
+      # Run the following command to start jupyter lab instance
+      jupyter lab
+
+   -  Notebook ``Base_Circle_Analysis_Figure_7.ipynb`` needs to be run
+      before ``Subsampling_Figures_8_9_and_10.ipynb`` to create base
+      circle reference value csv.
+   -  Notebooks might require additional configuration to fit your
+      datasets.
+
+Post any questions as issues here on GitHub or email me at
+nikolasovaskainen@gmail.com.
