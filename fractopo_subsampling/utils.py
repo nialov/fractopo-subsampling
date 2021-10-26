@@ -33,9 +33,9 @@ class Utils:
     params_with_func = {
         # "Fracture Intensity (Mauldon)": "mean",
         "Fracture Intensity P21": "mean",
+        "Dimensionless Intensity B22": "mean",
         "Connections per Branch": "mean",
         "trace power_law exponent": "mean",
-        "branch power_law exponent": "mean",
         "Number of Traces": "sum",
         "Number of Branches": "sum",
         "radius": "sum",
@@ -55,8 +55,8 @@ class Utils:
     selected_params = {
         "Connections per Branch",
         "trace power_law exponent",
-        "branch power_law exponent",
         "Fracture Intensity P21",
+        "Dimensionless Intensity B22",
     }
 
 
