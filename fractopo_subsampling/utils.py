@@ -36,6 +36,7 @@ class Utils:
         "Dimensionless Intensity B22": "mean",
         "Connections per Branch": "mean",
         "trace power_law exponent": "mean",
+        "trace power_law cut-off": "mean",
         "Number of Traces": "sum",
         "Number of Branches": "sum",
         "radius": "sum",
@@ -45,6 +46,8 @@ class Utils:
         "Trace Boundary 1 Intersect Count": "sum",
         "Trace Boundary 2 Intersect Count": "sum",
         "Trace Boundary 0 Intersect Count": "sum",
+        "Trace Mean Length": "mean",
+        "Branch Mean Length": "mean",
     }
 
     renamed_params = {
@@ -57,6 +60,28 @@ class Utils:
         "trace power_law exponent",
         "Fracture Intensity P21",
         "Dimensionless Intensity B22",
+    }
+
+    table_params = {
+        "Fracture Intensity P21",
+        "Dimensionless Intensity B22",
+        "Connections per Branch",
+        "trace power_law exponent",
+        "trace power_law cut-off",
+        "trace power_law vs. lognormal R",
+        "trace power_law vs. lognormal p",
+        "Trace Mean Length",
+        "Branch Mean Length",
+        "Number of Traces",
+        "Number of Branches",
+        "radius",
+        "I",
+        "Y",
+        "X",
+        "E",
+        "C - C",
+        "C - I",
+        "I - I",
     }
 
 

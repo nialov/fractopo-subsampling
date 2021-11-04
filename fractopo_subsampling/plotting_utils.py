@@ -4,6 +4,7 @@ Plotting utilities.
 import warnings
 from itertools import count
 from typing import Dict, Generator, Sequence, Tuple, Union
+from textwrap import wrap
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -17,6 +18,7 @@ from matplotlib.figure import Figure
 from pandas.core.groupby import DataFrameGroupBy
 
 import fractopo_subsampling.utils as utils
+from fractopo.analysis import length_distributions
 
 dist_continous = [
     d for d in dir(stats) if isinstance(getattr(stats, d), stats.rv_continuous)
@@ -640,11 +642,6 @@ def plot_distribution(
                 fontsize=8,
             )
 
-        # Test hashing the areas
-        # fill_xs = np.linspace(*interval)
-        # ax.fill_between(fill_xs, y1=beta_dist.pdf(fill_xs), facecolor=None,
-        # edgecolor=None, hatch=next(hatch_generator), alpha=0.01)
-
     # Plot reference value
     ax.axvline(reference_value_dict[param], linestyle="dashed", color="black")
 
@@ -775,3 +772,106 @@ def plot_group_pair_counts(
     legend.set_title(legend_title)
 
     return fig
+
+def setup_ax_for_ld(ax):
+    """
+    Configure ax for length distribution plots.
+
+    :param ax: Ax to setup.
+    :type ax: Axes
+    """
+    #
+    handles, labels = ax.get_legend_handles_labels()
+    labels = ["\n".join(wrap(label, 13)) for label in labels]
+    lgnd = plt.legend(
+        handles,
+        labels,
+        loc="upper center",
+        bbox_to_anchor=(1.37, 1.02),
+        ncol=2,
+        columnspacing=0.3,
+        shadow=True,
+        prop={"family": "DejaVu Sans", "weight": "heavy", "size": "large"},
+    )
+    for lh in lgnd.legendHandles:
+        # lh._sizes = [750]
+        lh.set_linewidth(3)
+
+def plot_distribution_fits(
+    length_array: np.ndarray,
+    ax,
+    cut_off= None,
+    fit= None,
+):
+    """
+    Plot length distribution and `powerlaw` fits.
+
+    If a powerlaw.Fit is not given it will be automatically determined (using
+    the optionally given cut_off).
+    """
+    if fit is None:
+        # Determine powerlaw, exponential, lognormal fits
+        fit = length_distributions.determine_fit(length_array, cut_off)
+    # Get fit xmin
+    xmin = fit.xmin if isinstance(fit.xmin, (int, float)) else 0.0
+    # Get the x, y data from fit
+    truncated_length_array, ccm_array = fit.ccdf()
+    full_length_array, full_ccm_array = fit.ccdf(original_data=True)
+    
+    full_ccm_array = full_ccm_array / (full_ccm_array[len(full_ccm_array) - len(ccm_array)] / ccm_array.max())
+    # Plot length scatter plot
+    plot_length_data_on_ax(ax, truncated_length_array, ccm_array, "trunc", truncated_values=True)
+    plot_length_data_on_ax(ax, full_length_array, full_ccm_array, "full", truncated_values=False)
+    ax.axvline(truncated_length_array.min(), linestyle="dotted", color="black", alpha=0.8, label="Cut-Off")
+    ax.text(
+        truncated_length_array.min(),
+        ccm_array.min(),
+        f"{round(xmin, 2)} m",
+        rotation=90,
+        horizontalalignment="right",
+        fontsize="small",
+    )
+    ax.text(
+        truncated_length_array.min() * 2,
+        ccm_array.max() * 5,
+        f"$e={round(-(fit.alpha - 1), 2)}$",
+        horizontalalignment="left",
+        verticalalignment="top",
+        fontsize="small",
+        rotation=-45,
+    )
+           #)
+    # Plot the actual fits (powerlaw, exp...)
+    for fit_distribution in (
+            length_distributions.Dist.EXPONENTIAL,
+            length_distributions.Dist.LOGNORMAL,
+            length_distributions.Dist.POWERLAW,
+    ):
+        length_distributions.plot_fit_on_ax(ax, fit, fit_distribution)
+    # Setup of ax appearance and axlims
+    # setup_ax_for_ld(ax=ax)
+    return fit
+
+
+def plot_length_data_on_ax(
+    ax,
+    length_array: np.ndarray,
+    ccm_array: np.ndarray,
+    label: str,
+    truncated_values:bool,
+):
+    """
+    Plot length data on given ax.
+
+    Sets ax scales to logarithmic.
+    """
+    ax.scatter(
+        x=length_array,
+        y=ccm_array,
+        s=1,
+        label=label,
+        color="black" if truncated_values else "brown",
+        alpha=1.0 if truncated_values else 0.02,
+        marker="x",
+    )
+    ax.set_xscale("log")
