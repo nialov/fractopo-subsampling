@@ -697,6 +697,7 @@ def plot_distribution(
         beta_dist.var(),
         statistic,
         pvalue,
+        pvalue > 0.05,
     )
     names = (
         r"\alpha",
@@ -706,6 +707,7 @@ def plot_distribution(
         "var",
         r"KS\ statistic",
         r"KS\ pvalue",
+        r"pvalue > 0.05",
     )
     assert len(vals) == len(names)
     param_text = "Beta Distribution\n"
@@ -773,6 +775,7 @@ def plot_group_pair_counts(
 
     return fig
 
+
 def setup_ax_for_ld(ax):
     """
     Configure ax for length distribution plots.
@@ -797,11 +800,12 @@ def setup_ax_for_ld(ax):
         # lh._sizes = [750]
         lh.set_linewidth(3)
 
+
 def plot_distribution_fits(
     length_array: np.ndarray,
     ax,
-    cut_off= None,
-    fit= None,
+    cut_off=None,
+    fit=None,
 ):
     """
     Plot length distribution and `powerlaw` fits.
@@ -817,12 +821,24 @@ def plot_distribution_fits(
     # Get the x, y data from fit
     truncated_length_array, ccm_array = fit.ccdf()
     full_length_array, full_ccm_array = fit.ccdf(original_data=True)
-    
-    full_ccm_array = full_ccm_array / (full_ccm_array[len(full_ccm_array) - len(ccm_array)] / ccm_array.max())
+
+    full_ccm_array = full_ccm_array / (
+        full_ccm_array[len(full_ccm_array) - len(ccm_array)] / ccm_array.max()
+    )
     # Plot length scatter plot
-    plot_length_data_on_ax(ax, truncated_length_array, ccm_array, "trunc", truncated_values=True)
-    plot_length_data_on_ax(ax, full_length_array, full_ccm_array, "full", truncated_values=False)
-    ax.axvline(truncated_length_array.min(), linestyle="dotted", color="black", alpha=0.8, label="Cut-Off")
+    plot_length_data_on_ax(
+        ax, truncated_length_array, ccm_array, "trunc", truncated_values=True
+    )
+    plot_length_data_on_ax(
+        ax, full_length_array, full_ccm_array, "full", truncated_values=False
+    )
+    ax.axvline(
+        truncated_length_array.min(),
+        linestyle="dotted",
+        color="black",
+        alpha=0.8,
+        label="Cut-Off",
+    )
     ax.text(
         truncated_length_array.min(),
         ccm_array.min(),
@@ -840,12 +856,12 @@ def plot_distribution_fits(
         fontsize="small",
         rotation=-45,
     )
-           #)
+    # )
     # Plot the actual fits (powerlaw, exp...)
     for fit_distribution in (
-            length_distributions.Dist.EXPONENTIAL,
-            length_distributions.Dist.LOGNORMAL,
-            length_distributions.Dist.POWERLAW,
+        length_distributions.Dist.EXPONENTIAL,
+        length_distributions.Dist.LOGNORMAL,
+        length_distributions.Dist.POWERLAW,
     ):
         length_distributions.plot_fit_on_ax(ax, fit, fit_distribution)
     # Setup of ax appearance and axlims
@@ -858,7 +874,7 @@ def plot_length_data_on_ax(
     length_array: np.ndarray,
     ccm_array: np.ndarray,
     label: str,
-    truncated_values:bool,
+    truncated_values: bool,
 ):
     """
     Plot length data on given ax.
