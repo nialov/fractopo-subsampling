@@ -649,7 +649,7 @@ def plot_distribution(
     ax.annotate(
         text="Reference value",
         xy=(reference_value_dict[param], max(y) * 1.02),
-        xytext=(reference_value_dict[param] - 0.4 * delta, max(y) * 1.03),
+        xytext=(reference_value_dict[param] - 0.36 * delta, max(y) * 1.13),
         arrowprops={"arrowstyle": "->"},
     )
 
@@ -677,11 +677,12 @@ def plot_distribution(
     else:
         ax.legend().remove()
 
-    def dist_param_str(value: float, name: str):
+    def dist_param_str(value: Union[float, bool], name: str):
         """
         Make string repr from param value.
         """
-        return f"${name} = {round(value, 3)}$"
+        processed = round(value, 3) if isinstance(value, float) else value
+        return f"${name} = {processed}$"
 
     # Kolmigoroff-Smirnov test
     kstest_result = stats.kstest(values, dist_str, args=(a, b, loc, scale))
