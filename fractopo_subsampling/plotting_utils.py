@@ -718,12 +718,12 @@ def plot_distribution(
 
     # Plot the collected text
     ax.text(
-        0.1,
-        0.25,
+        0.122,
+        0.35,
         s=param_text,
         ha="center",
         ma="right",
-        fontsize=8,
+        fontsize="medium",
         transform=ax.transAxes,
     )
 
