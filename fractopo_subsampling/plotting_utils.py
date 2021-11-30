@@ -319,10 +319,24 @@ def plot_group_pair_boxplots(
                 )
 
     # Set y label
-    ax.set_ylabel(utils.param_renamer(param))
+    renamed_param = utils.param_renamer(param)
+    param_unit = utils.Utils.unit_dict[renamed_param]
+    param_unit = param_unit if "[-]" not in param_unit else ""
+    # param_unit = param_unit if "[-]" not in param_unit else ""
+    ax.set_ylabel(renamed_param, fontdict=dict(size="medium"))
+
+    if j == 0:
+        ax.text(
+            -0.15,
+            1.02,
+            param_unit,
+            fontdict=dict(size="x-small"),
+            transform=ax.transAxes,
+            ha="center",
+        )
 
     # Set x label
-    ax.set_xlabel(r"Total Area ($10^3\ m^2$)")
+    ax.set_xlabel(r"Total Area [$10^3\ m^2$]")
 
     # Set reference value line
     ax.axhline(
@@ -658,7 +672,11 @@ def plot_distribution(
 
     # Set x and y labels
     ax.set_ylabel("Probability Density Function (PDF)")
-    ax.set_xlabel(param)
+    renamed_param = utils.param_renamer(param)
+    param_unit = utils.Utils.unit_dict[renamed_param]
+
+    # Set param name nicely and with unit
+    ax.set_xlabel(f"{renamed_param} {param_unit}")
 
     # Plot the background histplot of true values
     sns.histplot(
@@ -740,9 +758,6 @@ def plot_distribution(
 
     # Set y scale
     ax.set_ylim(0, max(y) * 1.2)
-
-    # Set param name nicely
-    ax.set_xlabel(utils.param_renamer(param))
 
 
 def plot_group_pair_counts(
@@ -828,10 +843,14 @@ def plot_distribution_fits(
     )
     # Plot length scatter plot
     plot_length_data_on_ax(
-        ax, truncated_length_array, ccm_array, "trunc", truncated_values=True
+        ax,
+        truncated_length_array,
+        ccm_array,
+        label="Remaining Data",
+        truncated_values=True,
     )
     plot_length_data_on_ax(
-        ax, full_length_array, full_ccm_array, "full", truncated_values=False
+        ax, full_length_array, full_ccm_array, "Truncated Data", truncated_values=False
     )
     ax.axvline(
         truncated_length_array.min(),
@@ -885,10 +904,10 @@ def plot_length_data_on_ax(
     ax.scatter(
         x=length_array,
         y=ccm_array,
-        s=1,
+        s=1 if truncated_values else 0.1,
         label=label,
         color="black" if truncated_values else "brown",
-        alpha=1.0 if truncated_values else 0.02,
+        alpha=1.0 if truncated_values else 0.1,
         marker="x",
     )
     ax.set_xscale("log")

@@ -83,6 +83,12 @@ class Utils:
         "C - I",
         "I - I",
     }
+    unit_dict = {
+        "Fracture Intensity P21": "[$m/m^2$]",
+        "Dimensionless Intensity B22": "[-]",
+        "Connections per Branch": "[-]",
+        "Trace Power-law Exponent": "[-]",
+    }
 
 
 @unique
