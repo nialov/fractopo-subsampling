@@ -99,7 +99,7 @@ def test_plot_group_pair_boxplots(make_plot, group):
     Test plot_group_pair_boxplots.
     """
     group_col_second = tests.group_col_second
-    param = tests.param
+    param = tests.FRACTURE_INTENSITY_P21
     group_second_labels = ("1-2", "2-3")
     multip_diff = 1.1
     outlier_proportion_threshold = 1.0

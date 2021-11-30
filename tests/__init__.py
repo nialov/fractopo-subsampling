@@ -22,6 +22,7 @@ shoreline_path = Path("misc/shoreline.geojson")
 param = "param"
 group_col_second = "group_col_second"
 group_col_first = "group_col_first"
+FRACTURE_INTENSITY_P21 = "Fracture Intensity P21"
 
 
 @lru_cache(maxsize=None)
@@ -261,7 +262,7 @@ def test_plot_group_pair_boxplots_params():
             {
                 group_col_first: ["1-2", "2-3", "1-2", "1-2", "2-3"],
                 group_col_second: ["1-2", "2-3", "1-2", "1-2", "2-3"],
-                param: [1, 2, 3, 4, 3],
+                FRACTURE_INTENSITY_P21: [1, 2, 3, 4, 3],
             }
         )
     ]
