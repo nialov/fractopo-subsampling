@@ -24,6 +24,7 @@ docs_notebooks_name = "docs_src/notebooks"
 tasks_name = "tasks.py"
 noxfile_name = "noxfile.py"
 pylama_config = "pylama.ini"
+misc_dir = "misc"
 
 # Globs
 docs_notebooks = Path("docs_src/notebooks").glob("*.ipynb")
@@ -44,7 +45,7 @@ def tests_pipenv(session: nox.Session):
     Run test suite with pipenv sync.
     """
     tmp_dir = session.create_tmp()
-    for to_copy in (package_name, tests_name, pipfile_lock, notebooks_name):
+    for to_copy in (package_name, tests_name, pipfile_lock, notebooks_name, misc_dir):
         if Path(to_copy).is_dir():
             copytree(to_copy, Path(tmp_dir) / to_copy)
         elif Path(to_copy).is_file():
