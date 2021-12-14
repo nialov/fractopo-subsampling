@@ -3,8 +3,8 @@ Plotting utilities.
 """
 import warnings
 from itertools import count
-from typing import Dict, Generator, Sequence, Tuple, Union
 from textwrap import wrap
+from typing import Dict, Generator, Sequence, Tuple, Union
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -12,13 +12,13 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
+from fractopo.analysis import length_distributions
 from matplotlib.axes import Axes
 from matplotlib.cbook import boxplot_stats
 from matplotlib.figure import Figure
 from pandas.core.groupby import DataFrameGroupBy
 
 import fractopo_subsampling.utils as utils
-from fractopo.analysis import length_distributions
 
 dist_continous = [
     d for d in dir(stats) if isinstance(getattr(stats, d), stats.rv_continuous)
