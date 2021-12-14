@@ -150,7 +150,7 @@ setup(
     extras_require={
         "dev": ["nox", "invoke", "jupyterlab", "ipython", "pytest",],
         "docs": ["sphinx", "sphinx-rtd-theme", "nbsphinx"],
-        "coverage": ["coverage", "coverage-badge"],
+        "coverage": ["coverage[toml]==5.5", "coverage-badge==1.0.1"],
     },  # Optional
     # If there are data files included in your packages that need to be
     # installed, specify them here.

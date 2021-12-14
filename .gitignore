@@ -10,3 +10,4 @@ dev/
 .vim
 .esri.gz
 docker
+/build/

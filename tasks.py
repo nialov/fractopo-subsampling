@@ -6,9 +6,9 @@ Most tasks employ nox to create a virtual session for testing.
 from pathlib import Path
 from shutil import copytree, rmtree
 
-from invoke import UnexpectedExit, task
+from invoke import task
 
-nox_parallel_sessions = (
+nox_test_sessions = (
     "tests_pipenv",
     "tests_pip",
 )
@@ -63,31 +63,14 @@ def lint(c):
 
 
 @task(pre=[requirements])
-def nox_parallel(c):
+def nox_tests(c):
     """
-    Run selected nox test suite sessions in parallel.
+    Run selected nox test suite sessions.
     """
-    # Run asynchronously and collect promises
-    print(f"Running {len(nox_parallel_sessions)} nox test sessions.")
-    promises = [
+    for nox_test in nox_test_sessions:
         c.run(
             f"nox --session {nox_test} --no-color",
-            asynchronous=True,
-            timeout=360,
         )
-        for nox_test in nox_parallel_sessions
-    ]
-
-    # Join all promises
-    results = [promise.join() for promise in promises]
-
-    # Check if Result has non-zero exit code (should've already thrown error.)
-    for result in results:
-        if result.exited != 0:
-            raise UnexpectedExit(result)
-
-    # Report to user of success.
-    print(f"{len(results)} nox sessions ran succesfully.")
 
 
 @task(pre=[sync_notebooks, requirements])
@@ -100,7 +83,7 @@ def ci_test(c):
     c.run("nox --session tests_pip")
 
 
-@task(pre=[nox_parallel])
+@task(pre=[nox_tests])
 def test(_):
     """
     Run tests.

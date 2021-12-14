@@ -3,6 +3,7 @@ Plotting utilities.
 """
 import warnings
 from itertools import count
+from textwrap import wrap
 from typing import Dict, Generator, Sequence, Tuple, Union
 
 import geopandas as gpd
@@ -11,6 +12,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
+from fractopo.analysis import length_distributions
 from matplotlib.axes import Axes
 from matplotlib.cbook import boxplot_stats
 from matplotlib.figure import Figure
@@ -317,10 +319,24 @@ def plot_group_pair_boxplots(
                 )
 
     # Set y label
-    ax.set_ylabel(utils.param_renamer(param))
+    renamed_param = utils.param_renamer(param)
+    param_unit = utils.Utils.unit_dict[renamed_param]
+    param_unit = param_unit if "[-]" not in param_unit else ""
+    # param_unit = param_unit if "[-]" not in param_unit else ""
+    ax.set_ylabel(renamed_param, fontdict=dict(size="medium"))
+
+    if j == 0:
+        ax.text(
+            -0.15,
+            1.02,
+            param_unit,
+            fontdict=dict(size="x-small"),
+            transform=ax.transAxes,
+            ha="center",
+        )
 
     # Set x label
-    ax.set_xlabel(r"Total Area ($10^3\ m^2$)")
+    ax.set_xlabel(r"Total Area [$10^3\ m^2$]")
 
     # Set reference value line
     ax.axhline(
@@ -640,11 +656,6 @@ def plot_distribution(
                 fontsize=8,
             )
 
-        # Test hashing the areas
-        # fill_xs = np.linspace(*interval)
-        # ax.fill_between(fill_xs, y1=beta_dist.pdf(fill_xs), facecolor=None,
-        # edgecolor=None, hatch=next(hatch_generator), alpha=0.01)
-
     # Plot reference value
     ax.axvline(reference_value_dict[param], linestyle="dashed", color="black")
 
@@ -652,7 +663,7 @@ def plot_distribution(
     ax.annotate(
         text="Reference value",
         xy=(reference_value_dict[param], max(y) * 1.02),
-        xytext=(reference_value_dict[param] - 0.4 * delta, max(y) * 1.03),
+        xytext=(reference_value_dict[param] - 0.36 * delta, max(y) * 1.13),
         arrowprops={"arrowstyle": "->"},
     )
 
@@ -661,7 +672,11 @@ def plot_distribution(
 
     # Set x and y labels
     ax.set_ylabel("Probability Density Function (PDF)")
-    ax.set_xlabel(param)
+    renamed_param = utils.param_renamer(param)
+    param_unit = utils.Utils.unit_dict[renamed_param]
+
+    # Set param name nicely and with unit
+    ax.set_xlabel(f"{renamed_param} {param_unit}")
 
     # Plot the background histplot of true values
     sns.histplot(
@@ -680,11 +695,12 @@ def plot_distribution(
     else:
         ax.legend().remove()
 
-    def dist_param_str(value: float, name: str):
+    def dist_param_str(value: Union[float, bool], name: str):
         """
         Make string repr from param value.
         """
-        return f"${name} = {round(value, 3)}$"
+        processed = round(value, 3) if isinstance(value, float) else value
+        return f"${name} = {processed}$"
 
     # Kolmigoroff-Smirnov test
     kstest_result = stats.kstest(values, dist_str, args=(a, b, loc, scale))
@@ -700,6 +716,7 @@ def plot_distribution(
         beta_dist.var(),
         statistic,
         pvalue,
+        pvalue > 0.05,
     )
     names = (
         r"\alpha",
@@ -709,6 +726,7 @@ def plot_distribution(
         "var",
         r"KS\ statistic",
         r"KS\ pvalue",
+        r"pvalue > 0.05",
     )
     assert len(vals) == len(names)
     param_text = "Beta Distribution\n"
@@ -718,12 +736,12 @@ def plot_distribution(
 
     # Plot the collected text
     ax.text(
-        0.1,
-        0.25,
+        0.122,
+        0.35,
         s=param_text,
         ha="center",
         ma="right",
-        fontsize=8,
+        fontsize="medium",
         transform=ax.transAxes,
     )
 
@@ -740,9 +758,6 @@ def plot_distribution(
 
     # Set y scale
     ax.set_ylim(0, max(y) * 1.2)
-
-    # Set param name nicely
-    ax.set_xlabel(utils.param_renamer(param))
 
 
 def plot_group_pair_counts(
@@ -775,3 +790,124 @@ def plot_group_pair_counts(
     legend.set_title(legend_title)
 
     return fig
+
+
+def setup_ax_for_ld(ax):
+    """
+    Configure ax for length distribution plots.
+
+    :param ax: Ax to setup.
+    :type ax: Axes
+    """
+    #
+    handles, labels = ax.get_legend_handles_labels()
+    labels = ["\n".join(wrap(label, 13)) for label in labels]
+    lgnd = plt.legend(
+        handles,
+        labels,
+        loc="upper center",
+        bbox_to_anchor=(1.37, 1.02),
+        ncol=2,
+        columnspacing=0.3,
+        shadow=True,
+        prop={"family": "DejaVu Sans", "weight": "heavy", "size": "large"},
+    )
+    for lh in lgnd.legendHandles:
+        # lh._sizes = [750]
+        lh.set_linewidth(3)
+
+
+def plot_distribution_fits(
+    length_array: np.ndarray,
+    ax,
+    cut_off=None,
+    fit=None,
+):
+    """
+    Plot length distribution and `powerlaw` fits.
+
+    If a powerlaw.Fit is not given it will be automatically determined (using
+    the optionally given cut_off).
+    """
+    if fit is None:
+        # Determine powerlaw, exponential, lognormal fits
+        fit = length_distributions.determine_fit(length_array, cut_off)
+    # Get fit xmin
+    xmin = fit.xmin if isinstance(fit.xmin, (int, float)) else 0.0
+    # Get the x, y data from fit
+    truncated_length_array, ccm_array = fit.ccdf()
+    full_length_array, full_ccm_array = fit.ccdf(original_data=True)
+
+    full_ccm_array = full_ccm_array / (
+        full_ccm_array[len(full_ccm_array) - len(ccm_array)] / ccm_array.max()
+    )
+    # Plot length scatter plot
+    plot_length_data_on_ax(
+        ax,
+        truncated_length_array,
+        ccm_array,
+        label="Remaining Data",
+        truncated_values=True,
+    )
+    plot_length_data_on_ax(
+        ax, full_length_array, full_ccm_array, "Truncated Data", truncated_values=False
+    )
+    ax.axvline(
+        truncated_length_array.min(),
+        linestyle="dotted",
+        color="black",
+        alpha=0.8,
+        label="Cut-Off",
+    )
+    ax.text(
+        truncated_length_array.min(),
+        ccm_array.min(),
+        f"{round(xmin, 2)} m",
+        rotation=90,
+        horizontalalignment="right",
+        fontsize="small",
+    )
+    ax.text(
+        truncated_length_array.min() * 2,
+        ccm_array.max() * 5,
+        f"$e={round(-(fit.alpha - 1), 2)}$",
+        horizontalalignment="left",
+        verticalalignment="top",
+        fontsize="small",
+        rotation=-45,
+    )
+    # )
+    # Plot the actual fits (powerlaw, exp...)
+    for fit_distribution in (
+        length_distributions.Dist.EXPONENTIAL,
+        length_distributions.Dist.LOGNORMAL,
+        length_distributions.Dist.POWERLAW,
+    ):
+        length_distributions.plot_fit_on_ax(ax, fit, fit_distribution)
+    # Setup of ax appearance and axlims
+    # setup_ax_for_ld(ax=ax)
+    return fit
+
+
+def plot_length_data_on_ax(
+    ax,
+    length_array: np.ndarray,
+    ccm_array: np.ndarray,
+    label: str,
+    truncated_values: bool,
+):
+    """
+    Plot length data on given ax.
+
+    Sets ax scales to logarithmic.
+    """
+    ax.scatter(
+        x=length_array,
+        y=ccm_array,
+        s=1 if truncated_values else 0.1,
+        label=label,
+        color="black" if truncated_values else "brown",
+        alpha=1.0 if truncated_values else 0.1,
+        marker="x",
+    )
+    ax.set_xscale("log")
