@@ -51,7 +51,7 @@ cd notebooks
 echo "Running notebooks in ./notebooks to test that everything works"
 
 ipython Base_Circle_Analysis_Figure_7.ipynb
-ipython Subsampling_Figures_8_9_and_10.ipynb
+ipython Subsampling_Figures_8_10_and_11.ipynb
 
 cd -
 
