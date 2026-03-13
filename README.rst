@@ -1,3 +1,11 @@
+The main fracture network subsampling functionality has been integrated
+into ``fractopo``. The functionality there should be the most up-to-date
+and easier to use.
+
+-  https://github.com/nialov/fractopo
+
+This repo has been archived as of 13.3.2026.
+
 Documentation
 =============
 
